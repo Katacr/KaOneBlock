@@ -1,4 +1,18 @@
 name: KaOneBlock
-version: '1.0'
+version: 1.0
 main: org.katacr.kaOneBlock.KaOneBlock
-api-version: '1.18'
+api-version: 1.13
+commands:
+  kaoneblock:
+    description: KaOneBlock plugin main command
+    usage: /kaoneblock help
+    aliases: [kob]
+permissions:
+  kaoneblock.reload:
+    description: Allows reloading the plugin configuration
+    default: op
+  kaoneblock.admin:
+    description: All admin commands
+    default: op
+    children:
+      - kaoneblock.reload
