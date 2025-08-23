@@ -2,10 +2,8 @@ package org.katacr.kaOneBlock;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -24,15 +22,15 @@ public class BlockGenerator {
      * @param player 目标玩家
      */
     public void generateBlockAtPlayerLocation(Player player) {
+        String worldName = player.getWorld().getName();
 
-        // 检查当前世界类型是否允许生成方块
-        if (!plugin.isWorldAllowed(player.getWorld())) {
+        // 检查当前世界是否允许生成方块
+        if (!plugin.isWorldAllowed(worldName)) {
             player.sendMessage(plugin.getLanguageManager().getMessage("world-type-not-allowed"));
             return;
         }
 
         // 检查玩家是否已经在当前世界生成过方块
-        String worldName = player.getWorld().getName();
         boolean hasBlock = plugin.getDatabaseManager().hasBlockInWorld(player.getUniqueId(), worldName);
 
         if (hasBlock) {
@@ -46,46 +44,88 @@ public class BlockGenerator {
         // 获取玩家脚下的方块位置
         Location blockLocation = playerLocation.clone();
 
-        // 获取世界类型
-        String worldType = getWorldType(player.getWorld().getEnvironment());
-
         // 获取方块列表
-        WeightedRandom<Material> blockList = plugin.getBlockList(worldType);
-        Material blockMaterial = getMaterial(blockList, blockLocation);
-
-        // 记录生成事件到数据库
-        plugin.getDatabaseManager().logBlockGeneration(player.getUniqueId(), player.getName(), worldName, blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockMaterial.name());
-
-        // 记录调试信息
-        plugin.debug("Generated block at " + blockLocation + ": " + blockMaterial);
-
-        // 记录调试信息
-        Map<String, String> replacements = new HashMap<>();
-        replacements.put("location", blockLocation.toString());
-        replacements.put("block", blockMaterial.name());
-        plugin.debug("debug-generated-block", replacements);
-
-    }
-
-    private @NotNull Material getMaterial(WeightedRandom<Material> blockList, Location blockLocation) {
-        Material blockMaterial;
+        WeightedRandom<Object> blockList = plugin.getBlockListForWorld(worldName);
+        Object blockObj = Material.STONE; // 默认使用石头
 
         if (blockList != null) {
             // 从方块列表中随机选择方块
-            blockMaterial = blockList.getRandom();
-            if (blockMaterial == null) {
-                // 无法选择方块，使用默认方块
-                blockMaterial = plugin.getDefaultBlockMaterial();
+            blockObj = blockList.getRandom();
+            if (blockObj == null) {
+                // 无法选择方块，使用石头
+                plugin.debug("Failed to get random block for world: " + worldName);
+                blockObj = Material.STONE;
             }
         } else {
-            // 没有配置方块列表，使用默认方块
-            blockMaterial = plugin.getDefaultBlockMaterial();
+            // 没有配置方块列表，使用石头
+            plugin.debug("No block list found for world: " + worldName);
         }
 
         // 在玩家当前位置生成方块
         Block targetBlock = blockLocation.getBlock();
-        targetBlock.setType(blockMaterial);
-        return blockMaterial;
+        if (blockObj instanceof Material material) {
+            // 原版方块
+            targetBlock.setType(material);
+        } else {
+            // ItemsAdder 方块
+            String iaBlockId = (String) blockObj;
+            // 去掉 "ia:" 前缀
+            String realBlockId = iaBlockId.substring(3);
+            boolean success = plugin.getItemsAdderManager().placeBlock(targetBlock.getLocation(), realBlockId);
+            if (!success) {
+                // 放置失败，使用石头作为回退
+                targetBlock.setType(Material.STONE);
+                blockObj = Material.STONE;
+                plugin.debug("Failed to place ItemsAdder block: " + realBlockId + ", using STONE instead");
+            }
+        }
+
+        // 记录生成事件到数据库
+        String blockType = blockObj instanceof Material ?
+                ((Material) blockObj).name() : (String) blockObj;
+        plugin.getDatabaseManager().logBlockGeneration(
+                player.getUniqueId(),
+                player.getName(),
+                worldName,
+                blockLocation.getBlockX(),
+                blockLocation.getBlockY(),
+                blockLocation.getBlockZ(),
+                blockType
+        );
+
+        // 记录日志
+        plugin.getLogManager().logBlockGeneration(
+                player.getName(),
+                worldName,
+                blockLocation,
+                Material.valueOf(blockType)
+        );
+
+        // 生成可读的方块名称
+        String blockDisplayName;
+        if (blockObj instanceof Material material) {
+            blockDisplayName = plugin.formatMaterialName(material);
+        } else {
+            // ItemsAdder 方块
+            String blockId = (String) blockObj;
+            if (blockId.startsWith("ia:")) {
+                blockDisplayName = blockId.substring(3).replace("_", " ");
+            } else {
+                blockDisplayName = blockId.replace("_", " ");
+            }
+        }
+
+        // 发送生成成功的消息（包含方块类型）
+        String message = plugin.getLanguageManager().getMessage("block-generated")
+                .replace("%block%", blockDisplayName);
+        player.sendMessage(message);
+
+        // 记录调试信息（控制台专用）
+        Map<String, String> debugReplacements = new HashMap<>();
+        debugReplacements.put("world", worldName);
+        debugReplacements.put("location", blockLocation.toString());
+        debugReplacements.put("block", blockType);
+        plugin.debug("debug-generated-block", debugReplacements);
     }
 
 
@@ -137,17 +177,4 @@ public class BlockGenerator {
         }
     }
 
-    /**
-     * 将世界环境类型转换为配置键
-     *
-     * @param environment 世界环境
-     * @return 配置键（normal, nether, the_end）
-     */
-    private String getWorldType(World.Environment environment) {
-        return switch (environment) {
-            case NETHER -> "nether";
-            case THE_END -> "the_end";
-            default -> "normal";
-        };
-    }
 }

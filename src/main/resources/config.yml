@@ -1,18 +1,16 @@
-# KaOneBlock Plugin Configuration
-
-# Available languages: en_US (English), zh_CN (Chinese)
+# config.yml
+debug: false
+log: true
 language: en_US
 
-default-block: OAK_LOG
-
-# 设置哪些世界类型允许生成方块
-world:
-  normal: true    # 主世界
-  nether: true    # 下界
-  the_end: true   # 末地
-
-  # 方块列表配置文件
+# 方块列表配置文件
 block-list:
-  normal: blocks/normal.yml    # 主世界方块列表
-  nether: blocks/nether.yml    # 下界方块列表
-  the_end: blocks/end.yml      # 末地方块列表
+  normal:
+    worlds:
+      - "world"
+  nether:
+    worlds:
+      - "world_nether"
+  end:
+    worlds:
+      - "world_the_end"

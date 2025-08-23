@@ -21,17 +21,7 @@ public class DatabaseManager {
             connection = DriverManager.getConnection(url);
 
             // 创建表（如果不存在）
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS generated_blocks (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "player_uuid TEXT NOT NULL," +
-                    "player_name TEXT NOT NULL," +
-                    "world_name TEXT NOT NULL," +
-                    "x INTEGER NOT NULL," +
-                    "y INTEGER NOT NULL," +
-                    "z INTEGER NOT NULL," +
-                    "block_type TEXT NOT NULL DEFAULT 'STONE'," +
-                    "generated_time DATETIME DEFAULT CURRENT_TIMESTAMP" +
-                    ")";
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS generated_blocks (" + "id INTEGER PRIMARY KEY AUTOINCREMENT," + "player_uuid TEXT NOT NULL," + "player_name TEXT NOT NULL," + "world_name TEXT NOT NULL," + "x INTEGER NOT NULL," + "y INTEGER NOT NULL," + "z INTEGER NOT NULL," + "block_type TEXT NOT NULL DEFAULT 'STONE'," + "generated_time DATETIME DEFAULT CURRENT_TIMESTAMP" + ")";
 
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute(createTableSQL);
@@ -73,8 +63,7 @@ public class DatabaseManager {
 
     public void logBlockGeneration(UUID playerUuid, String playerName, String worldName,
                                    int x, int y, int z, String blockType) {
-        String insertSQL = "INSERT INTO generated_blocks (player_uuid, player_name, world_name, x, y, z, block_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO generated_blocks (player_uuid, player_name, world_name, x, y, z, block_type) " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
             pstmt.setString(1, playerUuid.toString());
@@ -160,13 +149,8 @@ public class DatabaseManager {
             pstmt.setInt(2, recordId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to update block type for record: " + recordId, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to update block record: " + recordId, e);
         }
-        // 记录调试信息
-        Map<String, String> replacements = new HashMap<>();
-        replacements.put("id", String.valueOf(recordId));
-        replacements.put("block", blockType);
-        plugin.debug("debug-updated-block", replacements);
     }
 
     /**
