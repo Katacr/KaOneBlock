@@ -88,6 +88,14 @@ public class DatabaseManager {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to log block generation", e);
         }
+        // 记录调试信息
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("world", worldName);
+        replacements.put("x", String.valueOf(x));
+        replacements.put("y", String.valueOf(y));
+        replacements.put("z", String.valueOf(z));
+        replacements.put("block", blockType);
+        plugin.debug("debug-logged-generation", replacements);
     }
 
     public void close() {
@@ -98,6 +106,67 @@ public class DatabaseManager {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to close database connection", e);
         }
+    }
+
+    /**
+     * 根据位置查找方块记录
+     *
+     * @param worldName 世界名称
+     * @param x         X坐标
+     * @param y         Y坐标
+     * @param z         Z坐标
+     * @return 包含方块信息的Map，如果没有找到则返回null
+     */
+    public Map<String, Object> findBlockByLocation(String worldName, int x, int y, int z) {
+        String querySQL = "SELECT * FROM generated_blocks WHERE world_name = ? AND x = ? AND y = ? AND z = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
+            pstmt.setString(1, worldName);
+            pstmt.setInt(2, x);
+            pstmt.setInt(3, y);
+            pstmt.setInt(4, z);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                Map<String, Object> blockInfo = new HashMap<>();
+                blockInfo.put("id", rs.getInt("id"));
+                blockInfo.put("player_uuid", rs.getString("player_uuid"));
+                blockInfo.put("player_name", rs.getString("player_name"));
+                blockInfo.put("world_name", rs.getString("world_name"));
+                blockInfo.put("x", rs.getInt("x"));
+                blockInfo.put("y", rs.getInt("y"));
+                blockInfo.put("z", rs.getInt("z"));
+                blockInfo.put("block_type", rs.getString("block_type"));
+                return blockInfo;
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to find block at location: " + worldName + ", " + x + ", " + y + ", " + z, e);
+        }
+        return null;
+    }
+
+
+    /**
+     * 更新方块类型
+     *
+     * @param recordId  记录ID
+     * @param blockType 新的方块类型
+     */
+    public void updateBlockType(int recordId, String blockType) {
+        String updateSQL = "UPDATE generated_blocks SET block_type = ? WHERE id = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setString(1, blockType);
+            pstmt.setInt(2, recordId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to update block type for record: " + recordId, e);
+        }
+        // 记录调试信息
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("id", String.valueOf(recordId));
+        replacements.put("block", blockType);
+        plugin.debug("debug-updated-block", replacements);
     }
 
     /**

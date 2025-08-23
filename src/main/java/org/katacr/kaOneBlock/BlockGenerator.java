@@ -2,9 +2,13 @@ package org.katacr.kaOneBlock;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Map;
 
 public class BlockGenerator {
@@ -20,6 +24,7 @@ public class BlockGenerator {
      * @param player 目标玩家
      */
     public void generateBlockAtPlayerLocation(Player player) {
+
         // 检查当前世界类型是否允许生成方块
         if (!plugin.isWorldAllowed(player.getWorld())) {
             player.sendMessage(plugin.getLanguageManager().getMessage("world-type-not-allowed"));
@@ -41,27 +46,48 @@ public class BlockGenerator {
         // 获取玩家脚下的方块位置
         Location blockLocation = playerLocation.clone();
 
-        // 在玩家当前位置生成方块（使用配置的方块类型）
-        Block targetBlock = blockLocation.getBlock();
-        Material blockMaterial = plugin.getDefaultBlockMaterial();
-        targetBlock.setType(blockMaterial);
+        // 获取世界类型
+        String worldType = getWorldType(player.getWorld().getEnvironment());
 
-        // 记录生成事件到数据库（传递7个参数）
-        plugin.getDatabaseManager().logBlockGeneration(
-                player.getUniqueId(),
-                player.getName(),
-                worldName,
-                blockLocation.getBlockX(),
-                blockLocation.getBlockY(),
-                blockLocation.getBlockZ(),
-                blockMaterial.name() // 第7个参数：方块类型
-        );
+        // 获取方块列表
+        WeightedRandom<Material> blockList = plugin.getBlockList(worldType);
+        Material blockMaterial = getMaterial(blockList, blockLocation);
 
-        // 发送生成成功的消息（包含方块类型）
-        String message = plugin.getLanguageManager().getMessage("block-generated")
-                .replace("%block%", blockMaterial.name().toLowerCase().replace("_", " "));
-        player.sendMessage(message);
+        // 记录生成事件到数据库
+        plugin.getDatabaseManager().logBlockGeneration(player.getUniqueId(), player.getName(), worldName, blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockMaterial.name());
+
+        // 记录调试信息
+        plugin.debug("Generated block at " + blockLocation + ": " + blockMaterial);
+
+        // 记录调试信息
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("location", blockLocation.toString());
+        replacements.put("block", blockMaterial.name());
+        plugin.debug("debug-generated-block", replacements);
+
     }
+
+    private @NotNull Material getMaterial(WeightedRandom<Material> blockList, Location blockLocation) {
+        Material blockMaterial;
+
+        if (blockList != null) {
+            // 从方块列表中随机选择方块
+            blockMaterial = blockList.getRandom();
+            if (blockMaterial == null) {
+                // 无法选择方块，使用默认方块
+                blockMaterial = plugin.getDefaultBlockMaterial();
+            }
+        } else {
+            // 没有配置方块列表，使用默认方块
+            blockMaterial = plugin.getDefaultBlockMaterial();
+        }
+
+        // 在玩家当前位置生成方块
+        Block targetBlock = blockLocation.getBlock();
+        targetBlock.setType(blockMaterial);
+        return blockMaterial;
+    }
+
 
     /**
      * 移除指定位置的方块（设置为空气）
@@ -78,7 +104,7 @@ public class BlockGenerator {
      *
      * @param player 玩家
      */
-    public void removePlayerBlockInCurrentWorld(Player player) {
+    public void removePlayerBlockInCurrentWorld(@Nonnull Player player) {
         String worldName = player.getWorld().getName();
 
         // 从数据库获取玩家在当前世界生成的方块信息
@@ -109,5 +135,19 @@ public class BlockGenerator {
         } else {
             player.sendMessage(plugin.getLanguageManager().getMessage("remove-failed"));
         }
+    }
+
+    /**
+     * 将世界环境类型转换为配置键
+     *
+     * @param environment 世界环境
+     * @return 配置键（normal, nether, the_end）
+     */
+    private String getWorldType(World.Environment environment) {
+        return switch (environment) {
+            case NETHER -> "nether";
+            case THE_END -> "the_end";
+            default -> "normal";
+        };
     }
 }

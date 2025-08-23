@@ -52,7 +52,7 @@ public class CommandManager implements TabExecutor {
                 return true;
             }
 
-            // 开始命令 - 在玩家腿部位置生成石头
+            // 开始命令 - 在玩家腿部位置生成方块
             if (args[0].equalsIgnoreCase("start")) {
                 if (!(sender instanceof Player player)) {
                     sender.sendMessage(plugin.getLanguageManager().getMessage("player-only"));
@@ -64,7 +64,7 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
 
-                // 使用方块生成器在玩家位置生成石头
+                // 使用方块生成器在玩家位置生成方块
                 plugin.getBlockGenerator().generateBlockAtPlayerLocation(player);
                 return true;
             }

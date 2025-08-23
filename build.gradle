@@ -16,10 +16,15 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' } // Spigot仓库
+    maven { url 'https://repo.eclipse.org/content/groups/releases/' } // 添加 Eclipse 仓库
 }
 
 dependencies {
+    implementation 'org.jetbrains:annotations:24.1.0'
+    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
     compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
+    compileOnly 'jakarta.annotation:jakarta.annotation-api:2.1.1' // 替代 javax.annotation
 }
 
 tasks {
