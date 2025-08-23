@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
 
 public class LogManager {
     private final KaOneBlock plugin;
@@ -60,7 +61,7 @@ public class LogManager {
         try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
             writer.println(logMessage);
         } catch (IOException e) {
-            plugin.getLogger().log(java.util.logging.Level.SEVERE, "Failed to write to log file", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to write to log file", e);
         }
     }
 
@@ -70,7 +71,7 @@ public class LogManager {
      * @param player   玩家名称
      * @param world    世界名称
      * @param location 位置
-     * @param block    方块类型
+     * @param blockType    方块类型
      */
     public void logBlockReplacement(String player, String world, Location location, String blockType) {
         if (!enabled) return;
@@ -96,7 +97,7 @@ public class LogManager {
         try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
             writer.println(logMessage);
         } catch (IOException e) {
-            plugin.getLogger().log(java.util.logging.Level.SEVERE, "Failed to write to log file", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to write to log file", e);
         }
     }
 
