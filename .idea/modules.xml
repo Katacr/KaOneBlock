@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KaOneBlock.main.iml" filepath="$PROJECT_DIR$/.idea/modules/KaOneBlock.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/KaOneBlock.iml" filepath="$PROJECT_DIR$/.idea/KaOneBlock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KaOneBlock.test.iml" filepath="$PROJECT_DIR$/.idea/modules/KaOneBlock.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.katacr.KaOneBlock.main.iml" filepath="$PROJECT_DIR$/.idea/modules/org.katacr.KaOneBlock.main.iml" />
     </modules>
   </component>
 </project>

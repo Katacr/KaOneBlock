@@ -3,6 +3,7 @@ package org.katacr.kaOneBlock.chest;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -246,7 +247,6 @@ public class EnhancedChestManager {
     public void fillChest(org.bukkit.block.Chest chest, String chestConfigName) {
         ChestConfig config = chestConfigs.get(chestConfigName);
 
-
         if (chest == null) {
             plugin.debug("Cannot fill chest: chest is null");
             return;
@@ -260,8 +260,6 @@ public class EnhancedChestManager {
             }
         }
 
-        // 在处理所有组之前先获取宝箱的初始状态
-        ChestState chestState = new ChestState(chest);
         // 设置宝箱名称
         if (config.name != null && !config.name.isEmpty()) {
             String displayName = ChatColor.translateAlternateColorCodes('&', config.name);
@@ -275,11 +273,6 @@ public class EnhancedChestManager {
             return;
         }
 
-        // 确保箱子没有被锁定
-        if (chest.isLocked()) {
-            plugin.debug("Chest is locked, unlocking");
-            chest.setLock(null); // 移除锁定
-        }
 
         Inventory inventory = chest.getInventory();
         ThreadLocalRandom threadRandom = ThreadLocalRandom.current();
@@ -315,7 +308,6 @@ public class EnhancedChestManager {
         }
         plugin.debug("Total placed items: " + placedItems);
 
-
         // 记录最终库存状态
         if (plugin.isDebugEnabled()) {
             for (int i = 0; i < inventory.getSize(); i++) {
@@ -326,62 +318,38 @@ public class EnhancedChestManager {
             }
         }
 
-        // 使用新的更新方法，避免重置宝箱状态
-        updateChestWithoutReset(chest, chestState);
+        // 安全更新宝箱
+        safeUpdateChestWithoutLock(chest);
         plugin.debug("Enhanced chest filled with " + config.groups.size() + " groups");
-        // 强制更新宝箱状态
-        chest.update(true, true); // 强制更新并通知客户端
-        plugin.debug("Force updated chest state");
     }
 
-    private void updateChestWithoutReset(org.bukkit.block.Chest chest, ChestState originalState) {
+    private void safeUpdateChestWithoutLock(org.bukkit.block.Chest chest) {
         if (chest == null) {
             plugin.debug("Cannot update chest: chest is null");
             return;
         }
 
-        if (originalState == null) {
-            plugin.debug("Cannot update chest: originalState is null");
-            return;
-        }
-
-        // 确保箱子仍然存在
-        if (chest.getBlock().getType() != Material.CHEST) {
-            plugin.debug("Cannot update chest: block is no longer a chest");
-            return;
-        }
-
-        // 保存当前库存
-        Inventory inventory = chest.getInventory();
-
-        ItemStack[] contents = inventory.getContents();
-        if (contents == null) {
-            plugin.debug("Cannot update chest: contents is null");
-            return;
-        }
-
-        // 恢复原始宝箱状态（除了库存）
-        if (originalState.customName != null) {
-            chest.setCustomName(originalState.customName);
-        } else {
-            chest.setCustomName(null);
-        }
-
-        if (originalState.lock != null) {
-            chest.setLock(originalState.lock);
-        } else {
-            chest.setLock(null);
-        }
-
-        // 恢复库存
-        inventory.setContents(contents);
-
-        // 更新宝箱
         try {
-            chest.update();
-            plugin.debug("Chest updated without reset");
+            // 获取宝箱的方块状态
+            BlockState state = chest.getBlock().getState();
+            if (state instanceof org.bukkit.block.Chest chestState) {
+                // 复制库存
+                chestState.getInventory().setContents(chest.getInventory().getContents());
+
+                // 复制名称
+                chestState.setCustomName(chest.getCustomName());
+
+                // 关键修复：完全避免设置锁定状态
+                // 不设置锁定状态，避免触发问题
+
+                // 更新方块状态
+                chestState.update(true, true);
+                plugin.debug("Chest updated safely without lock");
+            } else {
+                plugin.debug("Block is no longer a chest, cannot update");
+            }
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to update chest", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to safely update chest", e);
         }
     }
 
@@ -435,6 +403,11 @@ public class EnhancedChestManager {
             if (chest != null) {
                 this.customName = chest.getCustomName();
                 this.lock = chest.getLock();
+
+                // 确保锁定状态不为空字符串
+                if (this.lock.isEmpty()) {
+                    this.lock = null;
+                }
             }
         }
     }
