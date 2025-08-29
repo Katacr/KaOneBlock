@@ -30,6 +30,32 @@ public class LogManager {
     }
 
     /**
+     * 记录宝箱生成日志
+     */
+    public void logChestGeneration(String player, String world, Location location, String chestConfig) {
+        if (!enabled) return;
+
+        Date now = new Date();
+        String dateStr = dateFormat.format(now);
+        String timeStr = timeFormat.format(now);
+
+        File logFile = new File(logDirectory, dateStr + ".log");
+
+        String locationStr = String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+        String logMessage = String.format("[%s] %s 在世界 %s 的位置 %s 生成了宝箱 (配置: %s)", timeStr, player, world, locationStr, chestConfig);
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
+            writer.println(logMessage);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to write to log file", e);
+        }
+
+        // 添加调试日志，但不操作方块
+        plugin.debug("Logged chest generation at " + location);
+    }
+
+    /**
      * 记录日志
      *
      * @param player   玩家名称
@@ -68,10 +94,10 @@ public class LogManager {
     /**
      * 记录方块替换日志
      *
-     * @param player   玩家名称
-     * @param world    世界名称
-     * @param location 位置
-     * @param blockType    方块类型
+     * @param player    玩家名称
+     * @param world     世界名称
+     * @param location  位置
+     * @param blockType 方块类型
      */
     public void logBlockReplacement(String player, String world, Location location, String blockType) {
         if (!enabled) return;

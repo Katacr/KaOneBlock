@@ -1,0 +1,44 @@
+# chests/advanced_chest.yml
+name: "&6高级宝箱"
+
+amount:
+  min: 3  #至少生成3个战利品
+  max: 6  #至多生成6个战利品
+
+items:
+  stone:
+    material: STONE
+    slot: -1
+    min: 1
+    max: 5
+    weight: 10
+    name: "&f普通石头"
+    lore:
+      - "&7一块普通的石头"
+      - "&8来自OneBlock"
+  dirt:
+    material: DIRT
+    slot: 10
+    min: 3
+    max: 7
+    weight: 8
+    name: "&e肥沃的泥土"
+  diamond_sword:
+    material: DIAMOND_SWORD
+    slot: 15
+    min: 1
+    max: 1
+    weight: 3
+    name: "&b钻石剑"
+    enchantments:
+      sharpness: 3
+      unbreaking: 2
+  custom_block:
+    material: "IA:custom_block"
+    slot: -1
+    min: 1
+    max: 1
+    weight: 2
+    name: "&6特殊物品"
+    lore:
+      - "&e这是ItemsAdder添加的自定义物品"

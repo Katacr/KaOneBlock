@@ -4,12 +4,14 @@ import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 /**
  * ItemsAdder 管理器
@@ -114,8 +116,31 @@ public class ItemsAdderManager {
     }
 
     /**
+     * 获取自定义方块的物品形式
+     *
+     * @param blockId 方块ID
+     * @return 物品堆，如果获取失败则返回null
+     */
+    public ItemStack getCustomBlockItem(String blockId) {
+        if (!enabled || !loaded) {
+            plugin.getLogger().warning("ItemsAdder is not available, cannot get custom block: " + blockId);
+            return null;
+        }
+        try {
+            CustomBlock customBlock = CustomBlock.getInstance(blockId);
+            if (customBlock != null) {
+                return customBlock.getItemStack();
+            }
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to get custom block: " + blockId, e);
+        }
+        return null;
+    }
+
+    /**
      * ItemsAdder 事件监听器
      */
+
     private class ItemsAdderListener implements Listener {
         @EventHandler
         public void onItemsAdderLoad(ItemsAdderLoadDataEvent event) {

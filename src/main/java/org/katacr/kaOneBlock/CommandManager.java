@@ -1,5 +1,8 @@
 package org.katacr.kaOneBlock;
 
+import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -13,7 +16,7 @@ import java.util.logging.Level;
 
 public class CommandManager implements TabExecutor {
     private final KaOneBlock plugin;
-    private final List<String> subCommands = Arrays.asList("help", "info", "reload", "start", "stop", "history");
+    private final List<String> subCommands = Arrays.asList("help", "log", "reload", "start", "stop", "debug", "ia-status", "debugchest");
 
     public CommandManager(KaOneBlock plugin) {
         this.plugin = plugin;
@@ -114,7 +117,28 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
             }
+            // 添加 debugchest 命令
+            if (args[0].equalsIgnoreCase("debugchest")) {
+                if (!sender.hasPermission("kaoneblock.debug")) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
+                    return true;
+                }
 
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("player-only"));
+                    return true;
+                }
+
+                // 获取玩家指向的方块
+                Block target = player.getTargetBlockExact(5);
+                if (target != null && target.getState() instanceof Chest chest) {
+                    plugin.getEnhancedChestManager().debugChestContents(chest);
+                    player.sendMessage(ChatColor.GREEN + "宝箱内容已输出到控制台");
+                } else {
+                    player.sendMessage(ChatColor.RED + "请看向一个宝箱");
+                }
+                return true;
+            }
             // 调试命令
             if (args[0].equalsIgnoreCase("debug")) {
                 if (!sender.hasPermission("kaoneblock.debug")) {

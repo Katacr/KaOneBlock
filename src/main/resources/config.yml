@@ -1,16 +1,51 @@
-# config.yml
-debug: false
-log: true
-language: en_US
+# KaOneBlock 配置文件
 
-# 方块列表配置文件
+# 调试模式
+debug: true
+
+# 日志设置
+log: true
+
+# 宝箱生成概率 (0.5 = 50%)
+chest:
+  chance: 0.5
+
+# 默认语言
+language: "zh_CN"
+
+# 方块列表配置
 block-list:
   normal:
     worlds:
-      - "world"
+      - world
+    file: normal.yml
   nether:
     worlds:
-      - "world_nether"
+      - world_nether
+    file: nether.yml
   end:
     worlds:
-      - "world_the_end"
+      - world_the_end
+    file: end.yml
+
+# 数据库设置
+database:
+  # SQLite 配置 (默认)
+  type: "sqlite"
+  file: "playerdata.db"
+
+  # MySQL 配置示例 (取消注释以启用)
+  # type: "mysql"
+  # host: "localhost"
+  # port: 3306
+  # database: "kaoneblock"
+  # username: "user"
+  # password: "password"
+  # prefix: "kob_"
+
+# 高级配置
+advanced:
+  # 方块更新延迟 (tick)
+  block-update-delay: 1
+  # 最大调试日志长度
+  max-debug-log-length: 1000

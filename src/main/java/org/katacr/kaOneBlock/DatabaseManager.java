@@ -61,8 +61,7 @@ public class DatabaseManager {
         }
     }
 
-    public void logBlockGeneration(UUID playerUuid, String playerName, String worldName,
-                                   int x, int y, int z, String blockType) {
+    public void logBlockGeneration(UUID playerUuid, String playerName, String worldName, int x, int y, int z, String blockType) {
         String insertSQL = "INSERT INTO generated_blocks (player_uuid, player_name, world_name, x, y, z, block_type) " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {

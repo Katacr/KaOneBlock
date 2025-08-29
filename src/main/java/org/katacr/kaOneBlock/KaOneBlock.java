@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.katacr.kaOneBlock.chest.EnhancedChestManager;
 
 import java.io.File;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public final class KaOneBlock extends JavaPlugin {
     private LanguageManager languageManager;
     private BlockGenerator blockGenerator;
     private DatabaseManager databaseManager;
+    private EnhancedChestManager enhancedChestManager;
     private LogManager logManager;
     private ItemsAdderManager itemsAdderManager;
 
@@ -28,12 +30,15 @@ public final class KaOneBlock extends JavaPlugin {
         saveDefaultConfig(); // 保存默认配置（如果不存在）
         createLangDirectory();
         createBlockDirectory();
+        createChestsDirectory(); // 创建宝箱目录
 
         // 加载配置（重要：在初始化管理器之前加载）
         reloadConfig();
 
         // 初始化 ItemsAdder 管理器
         itemsAdderManager = new ItemsAdderManager(this);
+
+        enhancedChestManager = new EnhancedChestManager(this);
 
         // 初始化日志管理器
         logManager = new LogManager(this);
@@ -56,6 +61,7 @@ public final class KaOneBlock extends JavaPlugin {
 
         // 初始化方块生成器
         blockGenerator = new BlockGenerator(this);
+
 
         // 初始化命令管理器
         CommandManager commandManager = new CommandManager(this);
@@ -100,6 +106,17 @@ public final class KaOneBlock extends JavaPlugin {
             saveResource("blocks/nether.yml", false);
             saveResource("blocks/end.yml", false);
             getLogger().info("Created block directory and saved default files");
+        }
+    }
+
+    private void createChestsDirectory() {
+        File chestsDir = new File(getDataFolder(), "chests");
+        if (!chestsDir.exists() && !chestsDir.mkdirs()) {
+            getLogger().warning("Failed to create chests directory: " + chestsDir.getAbsolutePath());
+        } else {
+            // 保存默认宝箱配置文件
+            saveResource("chests/advanced_chest.yml", false);
+            getLogger().info("Created chests directory and saved default files");
         }
     }
 
@@ -227,11 +244,16 @@ public final class KaOneBlock extends JavaPlugin {
     }
 
     public void reloadPlugin() {
-        reloadConfig(); // 重新加载配置文件
+        reloadConfig();
         debugMode = getConfig().getBoolean("debug", false);
         getLogger().info("Debug mode: " + (debugMode ? "enabled" : "disabled"));
         languageManager.loadLanguageFiles();
         loadBlockLists();
+
+        // 重载宝箱配置
+        if (enhancedChestManager != null) {
+            enhancedChestManager.loadChestConfigs();
+        }
 
         // 更新日志状态
         boolean logEnabled = getConfig().getBoolean("log", true);
@@ -246,6 +268,11 @@ public final class KaOneBlock extends JavaPlugin {
         if (debugMode) {
             getLogger().info("[DEBUG] " + message);
         }
+    }
+
+    // 添加 getter 方法
+    public EnhancedChestManager getEnhancedChestManager() {
+        return enhancedChestManager;
     }
 
     // Getter 方法
