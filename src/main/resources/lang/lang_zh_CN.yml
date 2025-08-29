@@ -23,9 +23,6 @@ debug-replaced-block: "在世界 %world% 的位置 %location% 替换方块为: %
 debug-generated-enhanced-chest: "在世界 %world% 的位置 %location% 生成了宝箱: %chestConfig%"
 debug-position-not-empty: "在世界 %world% 的位置 %location% 不是空气方块，无法放置新方块"
 
-# 宝箱消息
-chest-generated: "&6你发现了一个宝箱!"
-
 # 日志消息
 logging-enabled: "&a日志已启用!"
 logging-disabled: "&c日志已禁用!"

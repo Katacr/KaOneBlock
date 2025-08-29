@@ -23,9 +23,6 @@ debug-replaced-block: "Replaced block at %location% in world %world% with: %bloc
 debug-generated-enhanced-chest: "Generated enhanced chest at %location% in world %world%: %chestConfig%"
 debug-position-not-empty: "Position at %location% in world %world% is not air, cannot place new block"
 
-# Chest messages
-chest-generated: "&6You found a chest!"
-
 # Log messages
 logging-enabled: "&aLogging enabled!"
 logging-disabled: "&cLogging disabled!"

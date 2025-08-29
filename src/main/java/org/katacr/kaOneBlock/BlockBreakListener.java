@@ -125,12 +125,6 @@ public class BlockBreakListener implements Listener {
 
                             // 5. 记录日志
                             plugin.getLogManager().logChestGeneration(player.getName(), worldName, location, finalChestConfigName);
-
-                            // 6. 向玩家发送消息
-                            if (player.hasPermission("kaoneblock.notify.chest")) {
-                                String message = plugin.getLanguageManager().getMessage("chest-generated");
-                                player.sendMessage(message);
-                            }
                         }
                     }, 1L); // 额外延迟1tick
                 } else if (finalNewBlockObj instanceof Material material) {

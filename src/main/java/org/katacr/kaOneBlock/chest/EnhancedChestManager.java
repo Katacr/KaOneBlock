@@ -10,7 +10,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.katacr.kaOneBlock.KaOneBlock;
 import org.katacr.kaOneBlock.WeightedRandom;
 
@@ -135,6 +141,7 @@ public class EnhancedChestManager {
 
         // 处理ItemsAdder自定义物品
         ItemStack itemStack;
+        Material material = null;
         if (materialName.startsWith("IA:")) {
             // ItemsAdder自定义物品
             String customBlockId = materialName.substring(3);
@@ -150,7 +157,7 @@ public class EnhancedChestManager {
             }
         } else {
             // 原版物品
-            Material material = Material.matchMaterial(materialName);
+            material = Material.matchMaterial(materialName);
             if (material == null || material == Material.AIR) {
                 plugin.getLogger().warning("Invalid material: " + materialName);
                 return null;
@@ -213,11 +220,79 @@ public class EnhancedChestManager {
             }
         }
 
+        // 处理附魔书
+        if (material == Material.ENCHANTED_BOOK && itemSection.isConfigurationSection("stored-enchantments")) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta instanceof EnchantmentStorageMeta enchantMeta) {
+                ConfigurationSection enchantsSection = itemSection.getConfigurationSection("stored-enchantments");
+                if (enchantsSection != null) {
+                    for (String enchantName : enchantsSection.getKeys(false)) {
+                        Enchantment enchant = getEnchantmentByName(enchantName);
+                        if (enchant != null) {
+                            int level = enchantsSection.getInt(enchantName, 1);
+                            enchantMeta.addStoredEnchant(enchant, level, true);
+                        }
+                    }
+                }
+                itemStack.setItemMeta(enchantMeta);
+            }
+        }
+
+        // 处理药水
+        if (itemStack.getType().name().endsWith("POTION") || itemStack.getType() == Material.TIPPED_ARROW) {
+
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta instanceof PotionMeta potionMeta) {
+                // 基础药水类型
+                if (itemSection.isString("potion-type")) {
+                    String potionTypeStr = itemSection.getString("potion-type");
+                    try {
+                        PotionType potionType = PotionType.valueOf(potionTypeStr.toUpperCase());
+                        potionMeta.setBasePotionData(new PotionData(potionType));
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Invalid potion type: " + potionTypeStr);
+                    }
+                }
+
+                // 自定义效果
+                if (itemSection.isConfigurationSection("custom-effects")) {
+                    ConfigurationSection effectsSection = itemSection.getConfigurationSection("custom-effects");
+                    for (String effectKey : effectsSection.getKeys(false)) {
+                        ConfigurationSection effectSection = effectsSection.getConfigurationSection(effectKey);
+                        if (effectSection != null) {
+                            String effectTypeName = effectSection.getString("type");
+                            PotionEffectType type = PotionEffectType.getByName(effectTypeName.toUpperCase());
+                            if (type != null) {
+                                int duration = effectSection.getInt("duration", 200); // 默认10秒
+                                int amplifier = effectSection.getInt("amplifier", 0);
+                                boolean ambient = effectSection.getBoolean("ambient", false);
+                                boolean particles = effectSection.getBoolean("particles", true);
+                                boolean icon = effectSection.getBoolean("icon", true);
+
+                                PotionEffect effect = new PotionEffect(type, duration, amplifier, ambient, particles, icon);
+                                potionMeta.addCustomEffect(effect, true);
+                            }
+                        }
+                    }
+                }
+                itemStack.setItemMeta(potionMeta);
+            }
+        }
         int slot = itemSection.getInt("slot", -1);
         int min = itemSection.getInt("min", 1);
         int max = itemSection.getInt("max", min);
 
         return new ContainerItem(plugin, itemStack, slot, min, max);
+    }
+
+    // 辅助方法：获取附魔
+    private Enchantment getEnchantmentByName(String name) {
+        try {
+            NamespacedKey key = NamespacedKey.minecraft(name.toLowerCase());
+            return Enchantment.getByKey(key);
+        } catch (Exception e) {
+            return Enchantment.getByName(name.toUpperCase());
+        }
     }
 
     private void createFallbackConfig() {
