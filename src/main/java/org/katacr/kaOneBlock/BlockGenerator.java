@@ -6,7 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
 import java.util.Map;
 
 public class BlockGenerator {
@@ -17,21 +16,16 @@ public class BlockGenerator {
     }
 
     /**
-     * 在玩家腿部位置生成石头方块（每个世界只能生成一次）
+     * 在玩家腿部位置生成石头方块
      *
      * @param player 目标玩家
      */
     public void generateBlockAtPlayerLocation(Player player) {
-        String worldName = player.getWorld().getName();
+        // 初始化玩家进度
+        plugin.getStageManager().initPlayerProgress(player);
 
-        // 检查当前世界是否允许生成方块
-        if (!plugin.isWorldAllowed(worldName)) {
-            player.sendMessage(plugin.getLanguageManager().getMessage("world-type-not-allowed"));
-            return;
-        }
-
-        // 检查玩家是否已经在当前世界生成过方块
-        boolean hasBlock = plugin.getDatabaseManager().hasBlockInWorld(player.getUniqueId(), worldName);
+        // 检查玩家是否已经生成过方块
+        boolean hasBlock = plugin.getDatabaseManager().hasBlock(player.getUniqueId());
 
         if (hasBlock) {
             player.sendMessage(plugin.getLanguageManager().getMessage("already-generated"));
@@ -43,22 +37,24 @@ public class BlockGenerator {
 
         // 获取玩家脚下的方块位置
         Location blockLocation = playerLocation.clone();
+        blockLocation.setY(blockLocation.getY());
 
-        // 获取方块列表
-        WeightedRandom<Object> blockList = plugin.getBlockListForWorld(worldName);
+        // 获取当前阶段配置文件名
+        String stageFile = plugin.getStageManager().getCurrentStageFile(player.getUniqueId());
+
+        // 获取当前阶段的方块列表
+        WeightedRandom<Object> blockList = plugin.getBlockListManager().getBlockList(stageFile);
         Object blockObj = Material.STONE; // 默认使用石头
 
         if (blockList != null) {
             // 从方块列表中随机选择方块
             blockObj = blockList.getRandom();
             if (blockObj == null) {
-                // 无法选择方块，使用石头
-                plugin.debug("Failed to get random block for world: " + worldName);
+                plugin.debug("Failed to get random block from stage: " + stageFile);
                 blockObj = Material.STONE;
             }
         } else {
-            // 没有配置方块列表，使用石头
-            plugin.debug("No block list found for world: " + worldName);
+            plugin.debug("Block list for stage " + stageFile + " not loaded");
         }
 
         // 在玩家当前位置生成方块
@@ -80,26 +76,19 @@ public class BlockGenerator {
             }
         }
 
+        // 初始化玩家进度 - 这会发送初始阶段消息
+        plugin.getStageManager().initPlayerProgress(player);
+
         // 记录生成事件到数据库
-        String blockType = blockObj instanceof Material ?
-                ((Material) blockObj).name() : (String) blockObj;
-        plugin.getDatabaseManager().logBlockGeneration(
-                player.getUniqueId(),
-                player.getName(),
-                worldName,
-                blockLocation.getBlockX(),
-                blockLocation.getBlockY(),
-                blockLocation.getBlockZ(),
-                blockType
-        );
+        String blockType = blockObj instanceof Material ? ((Material) blockObj).name() : (String) blockObj;
+        plugin.getDatabaseManager().logBlockGeneration(player.getUniqueId(), player.getName(), blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockType);
 
         // 记录日志
-        plugin.getLogManager().logBlockGeneration(
-                player.getName(),
-                worldName,
-                blockLocation,
-                Material.valueOf(blockType)
-        );
+        if (blockObj instanceof Material material) {
+            plugin.getLogManager().logBlockGeneration(player.getName(), blockLocation, material);
+        } else {
+            plugin.getLogManager().logBlockGeneration(player.getName(), blockLocation, (String) blockObj);
+        }
 
         // 生成可读的方块名称
         String blockDisplayName;
@@ -116,18 +105,13 @@ public class BlockGenerator {
         }
 
         // 发送生成成功的消息（包含方块类型）
-        String message = plugin.getLanguageManager().getMessage("block-generated")
-                .replace("%block%", blockDisplayName);
+        String message = plugin.getLanguageManager().getMessage("block-generated").replace("%block%", blockDisplayName);
         player.sendMessage(message);
 
         // 记录调试信息（控制台专用）
-        Map<String, String> debugReplacements = new HashMap<>();
-        debugReplacements.put("world", worldName);
-        debugReplacements.put("location", blockLocation.toString());
-        debugReplacements.put("block", blockType);
+        Map<String, String> debugReplacements = KaOneBlock.createDebugReplacements(blockLocation, blockType);
         plugin.debug("debug-generated-block", debugReplacements);
     }
-
 
     /**
      * 移除指定位置的方块（设置为空气）
@@ -140,18 +124,16 @@ public class BlockGenerator {
     }
 
     /**
-     * 移除玩家在当前世界生成的方块
+     * 移除玩家生成的方块
      *
      * @param player 玩家
      */
-    public void removePlayerBlockInCurrentWorld(@Nonnull Player player) {
-        String worldName = player.getWorld().getName();
-
-        // 从数据库获取玩家在当前世界生成的方块信息
-        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByPlayerAndWorld(player.getUniqueId(), worldName);
+    public void removePlayerBlock(@Nonnull Player player) {
+        // 从数据库获取玩家生成的方块信息
+        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByPlayer(player.getUniqueId());
 
         if (blockInfo == null) {
-            player.sendMessage(plugin.getLanguageManager().getMessage("no-blocks-in-world"));
+            player.sendMessage(plugin.getLanguageManager().getMessage("no-blocks"));
             return;
         }
 
@@ -160,7 +142,7 @@ public class BlockGenerator {
         int y = (Integer) blockInfo.get("y");
         int z = (Integer) blockInfo.get("z");
 
-        // 获取世界对象
+        // 获取世界对象（使用玩家当前世界）
         org.bukkit.World world = player.getWorld();
 
         // 创建位置对象并移除方块
@@ -168,13 +150,14 @@ public class BlockGenerator {
         removeBlockAtLocation(blockLocation);
 
         // 从数据库删除记录
-        boolean deleted = plugin.getDatabaseManager().deleteBlockByPlayerAndWorld(player.getUniqueId(), worldName);
+        boolean deleted = plugin.getDatabaseManager().deleteBlock(player.getUniqueId());
 
         if (deleted) {
+            // 重置玩家阶段为初始阶段
+            plugin.getStageManager().resetPlayerStage(player, "normal.yml");
             player.sendMessage(plugin.getLanguageManager().getMessage("block-removed"));
         } else {
             player.sendMessage(plugin.getLanguageManager().getMessage("remove-failed"));
         }
     }
-
 }

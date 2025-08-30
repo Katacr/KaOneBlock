@@ -2,6 +2,7 @@ package org.katacr.kaOneBlock;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,7 +33,7 @@ public class LogManager {
     /**
      * 记录宝箱生成日志
      */
-    public void logChestGeneration(String player, String world, Location location, String chestConfig) {
+    public void logChestGeneration(String player, Location location, String chestConfig) {
         if (!enabled) return;
 
         Date now = new Date();
@@ -41,49 +42,51 @@ public class LogManager {
 
         File logFile = new File(logDirectory, dateStr + ".log");
 
+        // 从位置获取世界名称
+        World world = location.getWorld();
+        String worldName = world != null ? world.getName() : "未知世界";
+
         String locationStr = String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-        String logMessage = String.format("[%s] %s 在世界 %s 的位置 %s 生成了宝箱 (配置: %s)", timeStr, player, world, locationStr, chestConfig);
+        // 使用字符串拼接代替格式化
+        String logMessage = "[" + timeStr + "] " + player + " 在世界 " + worldName + " 的位置 " + locationStr + " 生成了宝箱 (配置: " + chestConfig + ")";
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
             writer.println(logMessage);
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to write to log file", e);
         }
-
-        // 添加调试日志，但不操作方块
-        plugin.debug("Logged chest generation at " + location);
     }
 
     /**
-     * 记录日志
-     *
-     * @param player   玩家名称
-     * @param world    世界名称
-     * @param location 位置
-     * @param block    方块类型
+     * 记录方块生成日志 (Material 版本)
      */
-    public void logBlockGeneration(String player, String world, Location location, Material block) {
+    public void logBlockGeneration(String player, Location location, Material block) {
+        logBlockGeneration(player, location, block.name());
+    }
+
+    /**
+     * 记录方块生成日志 (字符串版本)
+     */
+    public void logBlockGeneration(String player, Location location, String blockType) {
         if (!enabled) return;
 
-        // 获取当前日期和时间
         Date now = new Date();
         String dateStr = dateFormat.format(now);
         String timeStr = timeFormat.format(now);
 
-        // 创建日志文件路径
         File logFile = new File(logDirectory, dateStr + ".log");
 
-        // 格式化位置信息
+        // 从位置获取世界名称
+        World world = location.getWorld();
+        String worldName = world != null ? world.getName() : "未知世界";
+
         String locationStr = String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-        // 格式化方块名称
-        String blockName = block.name().toLowerCase().replace("_", " ");
+        String blockName = formatBlockName(blockType);
 
-        // 创建日志消息
-        String logMessage = String.format("[%s] %s 在世界 %s 的位置 %s 生成方块为 %s", timeStr, player, world, locationStr, blockName);
+        String logMessage = "[" + timeStr + "] " + player + " 在世界 " + worldName + " 的位置 " + locationStr + " 生成方块为 " + blockName;
 
-        // 写入日志文件
         try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
             writer.println(logMessage);
         } catch (IOException e) {
@@ -93,33 +96,26 @@ public class LogManager {
 
     /**
      * 记录方块替换日志
-     *
-     * @param player    玩家名称
-     * @param world     世界名称
-     * @param location  位置
-     * @param blockType 方块类型
      */
-    public void logBlockReplacement(String player, String world, Location location, String blockType) {
+    public void logBlockReplacement(String player, Location location, String blockType) {
         if (!enabled) return;
 
-        // 获取当前日期和时间
         Date now = new Date();
         String dateStr = dateFormat.format(now);
         String timeStr = timeFormat.format(now);
 
-        // 创建日志文件路径
         File logFile = new File(logDirectory, dateStr + ".log");
 
-        // 格式化位置信息
+        // 从位置获取世界名称
+        World world = location.getWorld();
+        String worldName = world != null ? world.getName() : "未知世界";
+
         String locationStr = String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-        // 格式化方块名称
         String blockName = formatBlockName(blockType);
 
-        // 创建日志消息
-        String logMessage = String.format("[%s] %s 在世界 %s 的位置 %s 替换方块为 %s", timeStr, player, world, locationStr, blockName);
+        String logMessage = "[" + timeStr + "] " + player + " 在世界 " + worldName + " 的位置 " + locationStr + " 替换方块为 " + blockName;
 
-        // 写入日志文件
         try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
             writer.println(logMessage);
         } catch (IOException e) {
@@ -136,8 +132,6 @@ public class LogManager {
 
     /**
      * 更新日志状态
-     *
-     * @param enabled 是否启用日志
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;

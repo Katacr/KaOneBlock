@@ -1,9 +1,16 @@
+# nether.yml
+amount: 300  # 需要破坏300个方块进入下一阶段
+next: end   # 下一阶段的配置(end.yml)
+message: '&c您已进入下界阶段'   # 开始阶段时的提示
+chests: #各个宝箱概率
+  nether_chest: 0.08
+  rare_chest: 0.03
+
 blocks:
-  NETHERRACK: 10
-  SOUL_SAND: 8
-  GRAVEL: 7
-  NETHER_QUARTZ_ORE: 6
-  MAGMA_BLOCK: 5
-  GLOWSTONE: 4
-  NETHER_GOLD_ORE: 3
-  ANCIENT_DEBRIS: 1
+  NETHERRACK: 30
+  SOUL_SAND: 20
+  GRAVEL: 15
+  MAGMA_BLOCK: 10
+  GLOWSTONE: 8
+  NETHER_QUARTZ_ORE: 15
+  ANCIENT_DEBRIS: 2

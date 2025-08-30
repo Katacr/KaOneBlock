@@ -11,12 +11,13 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
 public class CommandManager implements TabExecutor {
     private final KaOneBlock plugin;
-    private final List<String> subCommands = Arrays.asList("help", "log", "reload", "start", "stop", "debug", "ia-status", "debugchest");
+    private final List<String> subCommands = Arrays.asList("help", "log", "reload", "start", "stop", "debug", "ia-status", "debugchest", "reset-stage");
 
     public CommandManager(KaOneBlock plugin) {
         this.plugin = plugin;
@@ -53,7 +54,6 @@ public class CommandManager implements TabExecutor {
                 return true;
             }
 
-
             // 开始命令 - 在玩家腿部位置生成方块
             if (args[0].equalsIgnoreCase("start")) {
                 if (!sender.hasPermission("kaoneblock.start")) {
@@ -66,11 +66,15 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
 
+                // 初始化玩家进度 - 这会发送初始阶段消息
+                plugin.getStageManager().initPlayerProgress(player);
+
+                // 生成起始方块
                 plugin.getBlockGenerator().generateBlockAtPlayerLocation(player);
                 return true;
             }
 
-            // 停止命令 - 移除玩家在当前世界生成的方块
+            // 停止命令 - 移除玩家生成的方块
             if (args[0].equalsIgnoreCase("stop")) {
                 if (!sender.hasPermission("kaoneblock.stop")) {
                     sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
@@ -82,7 +86,7 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
 
-                plugin.getBlockGenerator().removePlayerBlockInCurrentWorld(player);
+                plugin.getBlockGenerator().removePlayerBlock(player);
                 return true;
             }
 
@@ -117,6 +121,23 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
             }
+// 在 CommandManager 中添加 reset-stage 命令
+            if (args[0].equalsIgnoreCase("reset-stage")) {
+                if (!sender.hasPermission("kaoneblock.admin")) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
+                    return true;
+                }
+
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("player-only"));
+                    return true;
+                }
+
+                // 重置玩家阶段
+                plugin.getStageManager().resetPlayerStage(player, "normal.yml");
+                player.sendMessage(plugin.getLanguageManager().getMessage("stage-reset"));
+                return true;
+            }
             // 添加 debugchest 命令
             if (args[0].equalsIgnoreCase("debugchest")) {
                 if (!sender.hasPermission("kaoneblock.debug")) {
@@ -139,6 +160,7 @@ public class CommandManager implements TabExecutor {
                 }
                 return true;
             }
+
             // 调试命令
             if (args[0].equalsIgnoreCase("debug")) {
                 if (!sender.hasPermission("kaoneblock.debug")) {
@@ -200,21 +222,32 @@ public class CommandManager implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-        List<String> completions = new ArrayList<>();
-
         // 处理 /kaoneblock 和 /kob 命令的标签补全
         if (cmd.getName().equalsIgnoreCase("kaoneblock") || cmd.getName().equalsIgnoreCase("kob")) {
             if (args.length == 1) {
                 // 子命令的标签补全
+                List<String> completions = new ArrayList<>();
                 for (String subCommand : subCommands) {
                     if (subCommand.startsWith(args[0].toLowerCase())) {
                         completions.add(subCommand);
                     }
                 }
+                return completions;
+            } else if (args.length == 2) {
+                // 特定子命令的标签补全
+                if (args[0].equalsIgnoreCase("log") || args[0].equalsIgnoreCase("debug")) {
+                    List<String> options = Arrays.asList("on", "off");
+                    List<String> completions = new ArrayList<>();
+                    for (String option : options) {
+                        if (option.startsWith(args[1].toLowerCase())) {
+                            completions.add(option);
+                        }
+                    }
+                    return completions;
+                }
             }
         }
-
-        return completions;
+        return Collections.emptyList();
     }
 
     private void showHelp(@Nonnull CommandSender sender) {
@@ -227,10 +260,18 @@ public class CommandManager implements TabExecutor {
         sender.sendMessage(languageManager.getMessage("help-stop"));
 
         // 仅 OP 玩家能看到的命令
-        if (sender.isOp()) {
+        if (sender.hasPermission("kaoneblock.reload") || sender.isOp()) {
             sender.sendMessage(languageManager.getMessage("help-reload"));
+        }
+
+        if (sender.hasPermission("kaoneblock.log") || sender.isOp()) {
             sender.sendMessage(languageManager.getMessage("help-log"));
+        }
+
+        if (sender.hasPermission("kaoneblock.debug") || sender.isOp()) {
             sender.sendMessage(languageManager.getMessage("help-debug"));
+            sender.sendMessage(languageManager.getMessage("help-debugchest"));
+            sender.sendMessage(languageManager.getMessage("help-ia-status"));
         }
 
         sender.sendMessage(languageManager.getMessage("help-more"));

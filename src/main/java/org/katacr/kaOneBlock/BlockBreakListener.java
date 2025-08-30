@@ -2,6 +2,7 @@ package org.katacr.kaOneBlock;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -11,7 +12,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class BlockBreakListener implements Listener {
     private final KaOneBlock plugin;
@@ -39,52 +43,86 @@ public class BlockBreakListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Location location = block.getLocation();
-        String worldName = Objects.requireNonNull(location.getWorld()).getName();
 
         // 检查方块是否由本插件生成
-        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByLocation(worldName, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByLocation(
+                location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (blockInfo == null) {
             // 不是本插件生成的方块，不做处理
             return;
         }
 
-        // 获取方块列表
-        WeightedRandom<Object> blockList = plugin.getBlockListForWorld(worldName);
-        Object newBlockObj = Material.STONE; // 默认使用石头
+        // 初始化玩家进度（如果尚未初始化）
+        plugin.getStageManager().initPlayerProgress(player);
+
+        // 增加玩家破坏方块计数
+        plugin.getStageManager().incrementBlocksBroken(player.getUniqueId());
+
+        // 获取当前阶段的宝箱概率配置
+        Map<String, Double> chestChances = plugin.getStageManager().getChestChances(player.getUniqueId());
+
+        // 检查是否应该生成宝箱
         boolean isChest = false;
         String chestConfigName = null;
 
-        // 检查是否应该生成宝箱
-        if (plugin.getEnhancedChestManager().shouldGenerateChest()) {
-            // 生成宝箱而不是普通方块
-            newBlockObj = Material.CHEST;
-            isChest = true;
-            chestConfigName = plugin.getEnhancedChestManager().getRandomChestConfig();
+        if (!chestChances.isEmpty()) {
+            // 使用阶段特定的宝箱概率
+            for (Map.Entry<String, Double> entry : chestChances.entrySet()) {
+                if (Math.random() <= entry.getValue()) {
+                    isChest = true;
+                    chestConfigName = entry.getKey();
+                    break;
+                }
+            }
         } else {
+            // 使用全局宝箱概率
+            double chestChance = plugin.getConfig().getDouble("chest-chance", 0.05);
+            if (Math.random() <= chestChance) {
+                isChest = true;
+                chestConfigName = plugin.getEnhancedChestManager().getRandomChestConfig();
+            }
+        }
+
+        // 获取当前阶段配置文件名
+        String stageFile = plugin.getStageManager().getCurrentStageFile(player.getUniqueId());
+
+        // 获取当前阶段的方块列表
+        WeightedRandom<Object> blockList = plugin.getBlockListManager().getBlockList(stageFile);
+        Object newBlockObj = Material.STONE; // 默认使用石头
+
+        if (!isChest) {
             if (blockList != null) {
                 // 随机选择新方块
                 newBlockObj = blockList.getRandom();
                 if (newBlockObj == null) {
-                    // 无法选择方块，使用石头
-                    plugin.debug("Failed to get random block for world: " + worldName);
+                    plugin.debug("Failed to get random block from stage: " + stageFile);
                     newBlockObj = Material.STONE;
                 }
             } else {
-                // 没有配置方块列表，使用石头
-                plugin.debug("No block list found for world: " + worldName);
+                plugin.debug("Block list for stage " + stageFile + " not loaded");
             }
+        } else {
+            // 生成宝箱
+            newBlockObj = Material.CHEST;
         }
 
         // 更新数据库记录
-        final String[] newBlockType = {newBlockObj instanceof Material ? ((Material) newBlockObj).name() : (String) newBlockObj};
+        final String newBlockType = newBlockObj instanceof Material ?
+                ((Material) newBlockObj).name() : (String) newBlockObj;
 
         // 如果是宝箱，在数据库中用特殊标记
         if (isChest && chestConfigName != null) {
-            newBlockType[0] = "CHEST:" + chestConfigName;
+            plugin.getDatabaseManager().updateBlockType(
+                    (Integer) blockInfo.get("id"),
+                    "CHEST:" + chestConfigName
+            );
+        } else {
+            plugin.getDatabaseManager().updateBlockType(
+                    (Integer) blockInfo.get("id"),
+                    newBlockType
+            );
         }
-
-        plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), newBlockType[0]);
 
         // 在事件完成后重新放置方块（延迟1 tick）
         Object finalNewBlockObj = newBlockObj;
@@ -112,19 +150,23 @@ public class BlockBreakListener implements Listener {
                         // 清理已处理的宝箱记录（避免内存泄漏）
                         processedChests.remove(location);
 
-                        if (location.getBlock().getState() instanceof org.bukkit.block.Chest chest) {
+                        if (location.getBlock().getState() instanceof Chest chest) {
                             // 3. 填充宝箱物品
                             plugin.getEnhancedChestManager().fillChest(chest, finalChestConfigName);
 
                             // 4. 记录调试信息
+                            World world = location.getWorld();
+                            String worldName = world != null ? world.getName() : "未知世界";
                             Map<String, String> debugReplacements = new HashMap<>();
                             debugReplacements.put("world", worldName);
-                            debugReplacements.put("location", location.toString());
+                            debugReplacements.put("x", String.valueOf(location.getBlockX()));
+                            debugReplacements.put("y", String.valueOf(location.getBlockY()));
+                            debugReplacements.put("z", String.valueOf(location.getBlockZ()));
                             debugReplacements.put("chestConfig", finalChestConfigName);
                             plugin.debug("debug-generated-enhanced-chest", debugReplacements);
 
                             // 5. 记录日志
-                            plugin.getLogManager().logChestGeneration(player.getName(), worldName, location, finalChestConfigName);
+                            plugin.getLogManager().logChestGeneration(player.getName(), location, finalChestConfigName);
                         }
                     }, 1L); // 额外延迟1tick
                 } else if (finalNewBlockObj instanceof Material material) {
@@ -139,27 +181,34 @@ public class BlockBreakListener implements Listener {
                     if (!success) {
                         // 放置失败，使用石头作为回退
                         location.getBlock().setType(Material.STONE);
-                        newBlockType[0] = Material.STONE.name();
                         plugin.debug("Failed to place ItemsAdder block: " + realBlockId + ", using STONE instead");
                     }
                 }
 
                 // 记录调试信息（如果不是宝箱）
                 if (!finalIsChest) {
+                    World world = location.getWorld();
+                    String worldName = world != null ? world.getName() : "未知世界";
                     Map<String, String> debugReplacements = new HashMap<>();
                     debugReplacements.put("world", worldName);
-                    debugReplacements.put("location", location.toString());
-                    debugReplacements.put("block", newBlockType[0]);
+                    debugReplacements.put("x", String.valueOf(location.getBlockX()));
+                    debugReplacements.put("y", String.valueOf(location.getBlockY()));
+                    debugReplacements.put("z", String.valueOf(location.getBlockZ()));
+                    debugReplacements.put("block", newBlockType);
                     plugin.debug("debug-replaced-block", debugReplacements);
 
                     // 记录日志
-                    plugin.getLogManager().logBlockReplacement(player.getName(), worldName, location, newBlockType[0]);
+                    plugin.getLogManager().logBlockReplacement(player.getName(), location, newBlockType);
                 }
             } else {
                 // 记录调试信息
+                World world = location.getWorld();
+                String worldName = world != null ? world.getName() : "未知世界";
                 Map<String, String> debugReplacements = new HashMap<>();
                 debugReplacements.put("world", worldName);
-                debugReplacements.put("location", location.toString());
+                debugReplacements.put("x", String.valueOf(location.getBlockX()));
+                debugReplacements.put("y", String.valueOf(location.getBlockY()));
+                debugReplacements.put("z", String.valueOf(location.getBlockZ()));
                 plugin.debug("debug-position-not-empty", debugReplacements);
             }
 
@@ -168,13 +217,10 @@ public class BlockBreakListener implements Listener {
                 // 格式化方块名称
                 String formattedBlockName;
                 if (finalIsChest) {
-                    // 尝试获取语言文件中的宝箱名称，如果不存在则使用默认值
+                    // 尝试获取语言文件中的宝箱名称
                     String chestNameMsg = plugin.getLanguageManager().getMessage("chest-name");
-                    if (chestNameMsg.startsWith("Message not found")) {
-                        formattedBlockName = "宝箱"; // 默认值
-                    } else {
-                        formattedBlockName = chestNameMsg;
-                    }
+                    formattedBlockName = chestNameMsg.startsWith("Message not found") ?
+                            "宝箱" : chestNameMsg;
                 } else if (finalNewBlockObj instanceof Material material) {
                     formattedBlockName = plugin.formatMaterialName(material);
                 } else {

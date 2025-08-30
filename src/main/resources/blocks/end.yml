@@ -1,9 +1,16 @@
+# end.yml
+amount: 400  # 需要破坏400个方块进入下一阶段
+next: ""   # 没有下一阶段（最终阶段）
+message: '&5您已进入末地阶段'   # 开始阶段时的提示
+chests: #各个宝箱概率
+  end_chest: 0.1
+  dragon_chest: 0.02
+
 blocks:
-  END_STONE: 10
+  END_STONE: 40
+  PURPUR_BLOCK: 20
+  END_STONE_BRICKS: 15
+  CHORUS_FLOWER: 10
+  END_ROD: 5
   OBSIDIAN: 8
-  PURPUR_BLOCK: 7
-  END_STONE_BRICKS: 6
-  CHORUS_FLOWER: 5
-  END_ROD: 4
-  SHULKER_BOX: 3
   DRAGON_EGG: 1

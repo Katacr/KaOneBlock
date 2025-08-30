@@ -13,6 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -139,21 +141,19 @@ public class EnhancedChestManager {
             return null;
         }
 
-        // 处理ItemsAdder自定义物品
         ItemStack itemStack;
         Material material = null;
+
         if (materialName.startsWith("IA:")) {
-            // ItemsAdder自定义物品
-            String customBlockId = materialName.substring(3);
-            if (plugin.getItemsAdderManager().isEnabled() && plugin.getItemsAdderManager().isLoaded()) {
-                itemStack = plugin.getItemsAdderManager().getCustomBlockItem(customBlockId);
-                if (itemStack == null) {
-                    plugin.getLogger().warning("Invalid ItemsAdder block: " + customBlockId);
-                    return null;
-                }
-            } else {
-                plugin.getLogger().warning("ItemsAdder not available for block: " + customBlockId);
-                return null;
+            String customItemId = materialName.substring(3);
+
+            // 简化逻辑：只尝试静默获取一次
+            itemStack = plugin.getItemsAdderManager().getCustomItemSilently(customItemId);
+
+            // 如果获取失败，创建占位物品
+            if (itemStack == null) {
+                itemStack = createPlaceholderItem(customItemId);
+                plugin.debug("Created placeholder for IA item: " + customItemId);
             }
         } else {
             // 原版物品
@@ -247,8 +247,13 @@ public class EnhancedChestManager {
                 if (itemSection.isString("potion-type")) {
                     String potionTypeStr = itemSection.getString("potion-type");
                     try {
-                        PotionType potionType = PotionType.valueOf(potionTypeStr.toUpperCase());
-                        potionMeta.setBasePotionData(new PotionData(potionType));
+                        PotionType potionType = null;
+                        if (potionTypeStr != null) {
+                            potionType = PotionType.valueOf(potionTypeStr.toUpperCase());
+                        }
+                        if (potionType != null) {
+                            potionMeta.setBasePotionData(new PotionData(potionType));
+                        }
                     } catch (IllegalArgumentException e) {
                         plugin.getLogger().warning("Invalid potion type: " + potionTypeStr);
                     }
@@ -257,20 +262,25 @@ public class EnhancedChestManager {
                 // 自定义效果
                 if (itemSection.isConfigurationSection("custom-effects")) {
                     ConfigurationSection effectsSection = itemSection.getConfigurationSection("custom-effects");
-                    for (String effectKey : effectsSection.getKeys(false)) {
-                        ConfigurationSection effectSection = effectsSection.getConfigurationSection(effectKey);
-                        if (effectSection != null) {
-                            String effectTypeName = effectSection.getString("type");
-                            PotionEffectType type = PotionEffectType.getByName(effectTypeName.toUpperCase());
-                            if (type != null) {
-                                int duration = effectSection.getInt("duration", 200); // 默认10秒
-                                int amplifier = effectSection.getInt("amplifier", 0);
-                                boolean ambient = effectSection.getBoolean("ambient", false);
-                                boolean particles = effectSection.getBoolean("particles", true);
-                                boolean icon = effectSection.getBoolean("icon", true);
+                    if (effectsSection != null) {
+                        for (String effectKey : effectsSection.getKeys(false)) {
+                            ConfigurationSection effectSection = effectsSection.getConfigurationSection(effectKey);
+                            if (effectSection != null) {
+                                String effectTypeName = effectSection.getString("type");
+                                PotionEffectType type = null;
+                                if (effectTypeName != null) {
+                                    type = PotionEffectType.getByName(effectTypeName.toUpperCase());
+                                }
+                                if (type != null) {
+                                    int duration = effectSection.getInt("duration", 200); // 默认10秒
+                                    int amplifier = effectSection.getInt("amplifier", 0);
+                                    boolean ambient = effectSection.getBoolean("ambient", false);
+                                    boolean particles = effectSection.getBoolean("particles", true);
+                                    boolean icon = effectSection.getBoolean("icon", true);
 
-                                PotionEffect effect = new PotionEffect(type, duration, amplifier, ambient, particles, icon);
-                                potionMeta.addCustomEffect(effect, true);
+                                    PotionEffect effect = new PotionEffect(type, duration, amplifier, ambient, particles, icon);
+                                    potionMeta.addCustomEffect(effect, true);
+                                }
                             }
                         }
                     }
@@ -293,6 +303,38 @@ public class EnhancedChestManager {
         } catch (Exception e) {
             return Enchantment.getByName(name.toUpperCase());
         }
+    }
+
+    // 创建占位物品（标记为需要运行时处理）
+    private ItemStack createPlaceholderItem(String itemId) {
+        ItemStack placeholder = new ItemStack(Material.BARRIER);
+        ItemMeta meta = placeholder.getItemMeta();
+
+        // 设置显示名称提醒
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.RED + "待加载物品: " + itemId);
+        }
+
+        // 添加Lore说明
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + "ItemsAdder 物品尚未加载");
+        lore.add(ChatColor.GRAY + "将在运行时尝试重新获取");
+        if (meta != null) {
+            meta.setLore(lore);
+        }
+
+        // 存储原始物品ID（用于后续获取）
+        PersistentDataContainer pdc = null;
+        if (meta != null) {
+            pdc = meta.getPersistentDataContainer();
+        }
+        NamespacedKey key = new NamespacedKey(plugin, "ia-item-id");
+        if (pdc != null) {
+            pdc.set(key, PersistentDataType.STRING, itemId);
+        }
+
+        placeholder.setItemMeta(meta);
+        return placeholder;
     }
 
     private void createFallbackConfig() {
@@ -467,24 +509,6 @@ public class EnhancedChestManager {
         }
 
         plugin.debug("Chest contains " + itemCount + " items");
-    }
-
-    // 内部类用于保存宝箱状态
-    private static class ChestState {
-        public String customName;
-        public String lock;
-
-        public ChestState(org.bukkit.block.Chest chest) {
-            if (chest != null) {
-                this.customName = chest.getCustomName();
-                this.lock = chest.getLock();
-
-                // 确保锁定状态不为空字符串
-                if (this.lock.isEmpty()) {
-                    this.lock = null;
-                }
-            }
-        }
     }
 
     private static class ChestConfig {

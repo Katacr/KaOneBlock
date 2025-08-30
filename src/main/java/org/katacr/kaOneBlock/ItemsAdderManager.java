@@ -1,6 +1,7 @@
 package org.katacr.kaOneBlock;
 
 import dev.lone.itemsadder.api.CustomBlock;
+import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,6 +26,28 @@ public class ItemsAdderManager {
     public ItemsAdderManager(JavaPlugin plugin) {
         this.plugin = plugin;
         initialize();
+    }
+
+    /**
+     * 获取任意ItemsAdder物品
+     *
+     * @param itemId 完整的物品ID（格式：namespace:item_id）
+     * @return 物品堆，如果获取失败则返回null
+     */
+    public ItemStack getCustomItem(String itemId) {
+        if (!enabled || !loaded) {
+            plugin.getLogger().warning("ItemsAdder is not available, cannot get custom item: " + itemId);
+            return null;
+        }
+        try {
+            CustomStack customStack = CustomStack.getInstance(itemId);
+            if (customStack != null) {
+                return customStack.getItemStack();
+            }
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to get custom item: " + itemId, e);
+        }
+        return null;
     }
 
     /**
@@ -97,6 +120,17 @@ public class ItemsAdderManager {
         }
     }
 
+    // 添加新方法：静默获取物品（不记录警告）
+    public ItemStack getCustomItemSilently(String itemId) {
+        if (!enabled || !loaded) return null;
+        try {
+            CustomStack customStack = CustomStack.getInstance(itemId);
+            return (customStack != null) ? customStack.getItemStack() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /**
      * 检查 ItemsAdder 是否可用
      *
@@ -115,27 +149,6 @@ public class ItemsAdderManager {
         return loaded;
     }
 
-    /**
-     * 获取自定义方块的物品形式
-     *
-     * @param blockId 方块ID
-     * @return 物品堆，如果获取失败则返回null
-     */
-    public ItemStack getCustomBlockItem(String blockId) {
-        if (!enabled || !loaded) {
-            plugin.getLogger().warning("ItemsAdder is not available, cannot get custom block: " + blockId);
-            return null;
-        }
-        try {
-            CustomBlock customBlock = CustomBlock.getInstance(blockId);
-            if (customBlock != null) {
-                return customBlock.getItemStack();
-            }
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to get custom block: " + blockId, e);
-        }
-        return null;
-    }
 
     /**
      * ItemsAdder 事件监听器
