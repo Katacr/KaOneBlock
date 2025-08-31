@@ -6,7 +6,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class BlockGenerator {
     private final KaOneBlock plugin;
@@ -16,12 +18,12 @@ public class BlockGenerator {
     }
 
     /**
-     * 在玩家腿部位置生成石头方块
+     * 在玩家腿部位置生成起始方块
      *
      * @param player 目标玩家
      */
     public void generateBlockAtPlayerLocation(Player player) {
-        // 初始化玩家进度
+        // 初始化玩家进度 - 这会发送初始阶段消息
         plugin.getStageManager().initPlayerProgress(player);
 
         // 检查玩家是否已经生成过方块
@@ -39,8 +41,38 @@ public class BlockGenerator {
         Location blockLocation = playerLocation.clone();
         blockLocation.setY(blockLocation.getY());
 
+        // 检查目标位置是否可替换
+        Block targetBlock = blockLocation.getBlock();
+        if (targetBlock.getType() != Material.AIR) {
+            // 获取位置信息
+            String locationInfo = String.format("(%d, %d, %d)", blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ());
+
+            // 获取方块名称
+            String blockName = plugin.formatMaterialName(targetBlock.getType());
+
+            // 发送错误消息
+            String message = plugin.getLanguageManager().getMessage("position-not-air").replace("%location%", locationInfo).replace("%block%", blockName);
+            player.sendMessage(message);
+
+            // 记录调试信息
+            Map<String, String> debugReplacements = new HashMap<>();
+            debugReplacements.put("location", locationInfo);
+            debugReplacements.put("block", targetBlock.getType().name());
+            plugin.debug("debug-position-not-air", debugReplacements);
+
+            return;
+        }
+
         // 获取当前阶段配置文件名
-        String stageFile = plugin.getStageManager().getCurrentStageFile(player.getUniqueId());
+        UUID playerId = player.getUniqueId();
+        String stageFile = plugin.getStageManager().getCurrentStageFile(playerId);
+
+        // 获取玩家进度
+        int blocksBroken = 0;
+        StageManager.PlayerStageProgress progress = plugin.getStageManager().getPlayerProgress(playerId);
+        if (progress != null) {
+            blocksBroken = progress.blocksBroken;
+        }
 
         // 获取当前阶段的方块列表
         WeightedRandom<Object> blockList = plugin.getBlockListManager().getBlockList(stageFile);
@@ -58,7 +90,6 @@ public class BlockGenerator {
         }
 
         // 在玩家当前位置生成方块
-        Block targetBlock = blockLocation.getBlock();
         if (blockObj instanceof Material material) {
             // 原版方块
             targetBlock.setType(material);
@@ -76,12 +107,10 @@ public class BlockGenerator {
             }
         }
 
-        // 初始化玩家进度 - 这会发送初始阶段消息
-        plugin.getStageManager().initPlayerProgress(player);
-
         // 记录生成事件到数据库
         String blockType = blockObj instanceof Material ? ((Material) blockObj).name() : (String) blockObj;
-        plugin.getDatabaseManager().logBlockGeneration(player.getUniqueId(), player.getName(), blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockType);
+
+        plugin.getDatabaseManager().logBlockGeneration(player.getUniqueId(), player.getName(), blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockType, stageFile, blocksBroken);
 
         // 记录日志
         if (blockObj instanceof Material material) {
@@ -124,7 +153,7 @@ public class BlockGenerator {
     }
 
     /**
-     * 移除玩家生成的方块
+     * 移除玩家生成的方块并重置阶段
      *
      * @param player 玩家
      */
@@ -154,7 +183,7 @@ public class BlockGenerator {
 
         if (deleted) {
             // 重置玩家阶段为初始阶段
-            plugin.getStageManager().resetPlayerStage(player, "normal.yml");
+            plugin.getStageManager().setPlayerStage(player, "normal.yml");
             player.sendMessage(plugin.getLanguageManager().getMessage("block-removed"));
         } else {
             player.sendMessage(plugin.getLanguageManager().getMessage("remove-failed"));

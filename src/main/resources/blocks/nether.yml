@@ -3,8 +3,8 @@ amount: 300  # 需要破坏300个方块进入下一阶段
 next: end   # 下一阶段的配置(end.yml)
 message: '&c您已进入下界阶段'   # 开始阶段时的提示
 chests: #各个宝箱概率
-  nether_chest: 0.08
-  rare_chest: 0.03
+  nether_chest: 0.03
+  advanced_chest: 0.01
 
 blocks:
   NETHERRACK: 30

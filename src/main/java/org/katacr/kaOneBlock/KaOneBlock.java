@@ -108,6 +108,8 @@ public final class KaOneBlock extends JavaPlugin {
 
         // 初始化方块生成器
         blockGenerator = new BlockGenerator(this);
+        // 注册玩家登录监听器
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
         // 初始化命令管理器
         CommandManager commandManager = new CommandManager(this);
@@ -136,13 +138,21 @@ public final class KaOneBlock extends JavaPlugin {
             getLogger().warning("Failed to create chests directory: " + chestsDir.getAbsolutePath());
         } else {
             // 保存默认宝箱配置文件
+            saveResource("chests/example_chest.yml", false);
             saveResource("chests/advanced_chest.yml", false);
+            saveResource("chests/common_chest.yml", false);
+            saveResource("chests/end_chest.yml", false);
+            saveResource("chests/nether_chest.yml", false);
             getLogger().info("Created chests directory and saved default files");
         }
     }
 
     @Override
     public void onDisable() {
+
+        // 新增：从数据库加载玩家进度
+        stageManager.loadAllPlayerProgress();
+
         // 关闭数据库连接
         if (databaseManager != null) {
             databaseManager.close();

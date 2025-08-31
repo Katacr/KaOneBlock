@@ -25,8 +25,16 @@ public class StageManager {
         UUID playerId = player.getUniqueId();
         if (!playerProgress.containsKey(playerId)) {
             // 默认从 normal.yml 开始
-            setPlayerStageAndSendMessage(player, "normal.yml");
+            setPlayerStage(player, "normal.yml");
         }
+    }
+
+    // 文档15: StageManager.java
+    public void loadAllPlayerProgress() {
+        Map<UUID, PlayerStageProgress> progressMap = plugin.getDatabaseManager().loadAllPlayerProgress();
+
+        playerProgress.clear();
+        playerProgress.putAll(progressMap);
     }
 
     /**
@@ -60,6 +68,22 @@ public class StageManager {
         if (config.message != null && !config.message.isEmpty()) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
             plugin.debug("发送阶段消息: " + config.message);
+        }
+    }
+
+    // StageManager.java
+    public void onPlayerJoin(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (!playerProgress.containsKey(playerId)) {
+            // 从数据库加载进度
+            PlayerStageProgress progress = plugin.getDatabaseManager().loadPlayerProgress(playerId);
+
+            if (progress != null) {
+                playerProgress.put(playerId, progress);
+            } else {
+                // 新玩家：设置初始阶段
+                setPlayerStage(player, "normal.yml");
+            }
         }
     }
 
@@ -159,13 +183,67 @@ public class StageManager {
     }
 
     /**
+     * 设置玩家阶段（强制设置）
+     *
+     * @param player    玩家
+     * @param stageFile 阶段配置文件
+     */
+    public void setPlayerStage(Player player, String stageFile) {
+        if (player == null) {
+            plugin.getLogger().warning("Cannot set stage for null player");
+            return;
+        }
+
+        UUID playerId = player.getUniqueId();
+
+        // 确保文件名有扩展名
+        if (!stageFile.endsWith(".yml")) {
+            stageFile += ".yml";
+        }
+
+        // 加载阶段配置
+        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
+        if (config == null) {
+            plugin.getLogger().warning("无法加载阶段配置: " + stageFile);
+            return;
+        }
+
+        // 设置或更新玩家进度
+        PlayerStageProgress progress = playerProgress.get(playerId);
+        if (progress == null) {
+            progress = new PlayerStageProgress(stageFile, 0);
+            playerProgress.put(playerId, progress);
+        } else {
+            progress.stageFile = stageFile;
+            progress.blocksBroken = 0; // 重置破坏计数
+        }
+
+        plugin.debug("设置玩家 " + player.getName() + " 阶段: " + stageFile + " (重置计数)");
+
+        // 发送阶段开始消息
+        if (config.message != null && !config.message.isEmpty()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
+            plugin.debug("发送阶段消息: " + config.message);
+        }
+
+        // 更新数据库
+        plugin.getDatabaseManager().updatePlayerStage(playerId, stageFile, 0);
+    }
+
+    // 添加公共方法获取玩家进度
+    public PlayerStageProgress getPlayerProgress(UUID playerId) {
+        return playerProgress.get(playerId);
+    }
+
+    /**
      * 玩家阶段进度内部类
      */
-    private static class PlayerStageProgress {
-        String stageFile;
-        int blocksBroken;
 
-        PlayerStageProgress(String stageFile, int blocksBroken) {
+    public static class PlayerStageProgress {
+        public String stageFile;
+        public int blocksBroken;
+
+        public PlayerStageProgress(String stageFile, int blocksBroken) {
             this.stageFile = stageFile;
             this.blocksBroken = blocksBroken;
         }

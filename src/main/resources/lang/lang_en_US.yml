@@ -16,6 +16,7 @@ no-blocks-in-world: "&cNo blocks found in this world!"
 remove-failed: "&cFailed to remove block!"
 already-generated: "&cYou have already generated a block in this world!"
 world-type-not-allowed: "&cThis world type is not allowed!"
+position-not-air: "&cCannot generate block! Location %location% is occupied by %block% block, please ensure it's air!"
 
 # Debug messages
 debug-generated-block: "Generated block at %location% in world %world%: %block%"

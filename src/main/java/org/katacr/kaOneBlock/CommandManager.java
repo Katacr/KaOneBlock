@@ -1,5 +1,6 @@
 package org.katacr.kaOneBlock;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -9,15 +10,15 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
 public class CommandManager implements TabExecutor {
     private final KaOneBlock plugin;
-    private final List<String> subCommands = Arrays.asList("help", "log", "reload", "start", "stop", "debug", "ia-status", "debugchest", "reset-stage");
+    private final List<String> subCommands = Arrays.asList("help", "log", "reload", "start", "stop", "debug", "ia-status", "debugchest", "reset-stage", "set");
 
     public CommandManager(KaOneBlock plugin) {
         this.plugin = plugin;
@@ -51,6 +52,62 @@ public class CommandManager implements TabExecutor {
                     sender.sendMessage(plugin.getLanguageManager().getMessage("reload-error"));
                     plugin.getLogger().log(Level.SEVERE, "Error reloading config: ", e);
                 }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("set")) {
+                if (!sender.hasPermission("kaoneblock.admin")) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
+                    return true;
+                }
+
+                if (args.length < 3) {
+                    sender.sendMessage(ChatColor.RED + "用法: /kob set <玩家> <阶段>");
+                    return true;
+                }
+
+                // 获取玩家
+                Player targetPlayer = Bukkit.getPlayer(args[1]);
+                if (targetPlayer == null) {
+                    sender.sendMessage(ChatColor.RED + "玩家 " + args[1] + " 不在线或不存在");
+                    return true;
+                }
+
+                // 确保玩家数据存在
+                if (!plugin.getDatabaseManager().hasBlock(targetPlayer.getUniqueId())) {
+                    sender.sendMessage(ChatColor.RED + "玩家 " + args[1] + " 还没有生成方块，请先使用 /kob start");
+                    return true;
+                }
+
+                // 获取阶段文件名（确保有扩展名）
+                String stageFile = args[2];
+                if (!stageFile.endsWith(".yml")) {
+                    stageFile += ".yml";
+                }
+
+                // 检查阶段文件是否存在
+                File stageConfigFile = new File(plugin.getDataFolder(), "blocks/" + stageFile);
+                if (!stageConfigFile.exists()) {
+                    sender.sendMessage(ChatColor.RED + "阶段配置文件不存在: " + stageFile);
+                    // 列出可用阶段
+                    StringBuilder availableStages = new StringBuilder(ChatColor.YELLOW + "可用阶段: ");
+                    File blocksDir = new File(plugin.getDataFolder(), "blocks");
+                    if (blocksDir.exists()) {
+                        File[] files = blocksDir.listFiles((dir, name) -> name.endsWith(".yml"));
+                        if (files != null) {
+                            for (File file : files) {
+                                String fileName = file.getName().replace(".yml", "");
+                                availableStages.append(fileName).append(", ");
+                            }
+                        }
+                    }
+                    sender.sendMessage(availableStages.toString());
+                    return true;
+                }
+
+                // 强制设置玩家阶段
+                plugin.getStageManager().setPlayerStage(targetPlayer, stageFile);
+
+                sender.sendMessage(ChatColor.GREEN + "已设置玩家 " + targetPlayer.getName() + " 的阶段为: " + stageFile);
                 return true;
             }
 
@@ -121,7 +178,7 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
             }
-// 在 CommandManager 中添加 reset-stage 命令
+            // 在 CommandManager 中添加 reset-stage 命令
             if (args[0].equalsIgnoreCase("reset-stage")) {
                 if (!sender.hasPermission("kaoneblock.admin")) {
                     sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
@@ -192,7 +249,16 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
             }
+            if (args[0].equalsIgnoreCase("checkdb")) {
+                if (!sender.hasPermission("kaoneblock.admin")) {
+                    sender.sendMessage(plugin.getLanguageManager().getMessage("no-permission"));
+                    return true;
+                }
 
+                plugin.getDatabaseManager().checkTableStructure();
+                sender.sendMessage(ChatColor.GREEN + "已检查数据库表结构");
+                return true;
+            }
             // 添加 ItemsAdder 状态命令
             if (args[0].equalsIgnoreCase("ia-status")) {
                 if (!sender.hasPermission("kaoneblock.debug")) {
@@ -222,32 +288,67 @@ public class CommandManager implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
+        List<String> completions = new ArrayList<>();
+
         // 处理 /kaoneblock 和 /kob 命令的标签补全
         if (cmd.getName().equalsIgnoreCase("kaoneblock") || cmd.getName().equalsIgnoreCase("kob")) {
             if (args.length == 1) {
                 // 子命令的标签补全
-                List<String> completions = new ArrayList<>();
                 for (String subCommand : subCommands) {
                     if (subCommand.startsWith(args[0].toLowerCase())) {
                         completions.add(subCommand);
                     }
                 }
-                return completions;
+            } else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
+                // set 命令的玩家补全
+                String partialName = args[1].toLowerCase();
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    String playerName = player.getName();
+                    if (playerName.toLowerCase().startsWith(partialName)) {
+                        completions.add(playerName);
+                    }
+                }
+            } else if (args.length == 3 && args[0].equalsIgnoreCase("set")) {
+                // set 命令的阶段补全
+                String partialStage = args[2].toLowerCase();
+                List<String> stageFiles = getAvailableStageFiles();
+                for (String stage : stageFiles) {
+                    if (stage.toLowerCase().startsWith(partialStage)) {
+                        completions.add(stage);
+                    }
+                }
             } else if (args.length == 2) {
-                // 特定子命令的标签补全
+                // 其他命令的补全（如 log, debug）
                 if (args[0].equalsIgnoreCase("log") || args[0].equalsIgnoreCase("debug")) {
                     List<String> options = Arrays.asList("on", "off");
-                    List<String> completions = new ArrayList<>();
                     for (String option : options) {
                         if (option.startsWith(args[1].toLowerCase())) {
                             completions.add(option);
                         }
                     }
-                    return completions;
                 }
             }
         }
-        return Collections.emptyList();
+
+        return completions;
+    }
+
+    /**
+     * 获取所有可用的阶段文件名（不含扩展名）
+     */
+    private List<String> getAvailableStageFiles() {
+        List<String> stageFiles = new ArrayList<>();
+        File blocksDir = new File(plugin.getDataFolder(), "blocks");
+        if (blocksDir.exists() && blocksDir.isDirectory()) {
+            File[] files = blocksDir.listFiles((dir, name) -> name.endsWith(".yml"));
+            if (files != null) {
+                for (File file : files) {
+                    String fileName = file.getName().replace(".yml", "");
+                    stageFiles.add(fileName);
+                }
+            }
+        }
+        return stageFiles;
     }
 
     private void showHelp(@Nonnull CommandSender sender) {

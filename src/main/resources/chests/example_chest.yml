@@ -1,0 +1,81 @@
+# chests/example_chest.yml
+name: '示例宝箱' # 宝箱标题
+
+amount:
+  min: 3 # 至少生成3个战利品
+  max: 6 # 至多生成6个战利品
+
+items:
+  teststone: # 命名ID
+    material: STONE # 物品ID
+    slot: -1 # 自定义槽位,-1则随机位置
+    min: 1 # 每次刷出的最少数量
+    max: 5 # 每次刷出的最多数量
+    weight: 10 # 权重10最常见，1最稀有
+    name: '&f测试石头' # 自定义物品名称
+    lore: # 自定义物品Lore
+      - '&7一块测试的石头'
+      - '&8来自KaOneBlock'
+
+  dirt:
+    material: DIRT
+    slot: 10
+    min: 3
+    max: 7
+    weight: 8
+    name: '&e肥沃的泥土'
+
+  diamond_sword:
+    material: DIAMOND_SWORD
+    slot: 15
+    min: 1
+    max: 1
+    weight: 3
+    name: '&b钻石剑'
+    enchantments: # 添加装备附魔
+      sharpness: 3
+      unbreaking: 2
+
+  custom_block:
+    material: 'IA:tin_ore' # 支持ItemsAdder物品
+    slot: -1
+    min: 1
+    max: 1
+    weight: 2
+    name: '&6测试ia物品'
+    lore:
+      - '&e这是ItemsAdder添加的自定义物品'
+
+  # 附魔书示例
+  sharpness_book:
+    material: ENCHANTED_BOOK
+    name: '&6火焰之书'
+    stored-enchantments: # 附魔书专用：附魔
+      FIRE_ASPECT: 2
+    weight: 3
+    min: 1
+    max: 1
+
+  # 药水示例
+  strength_potion:
+    material: POTION
+    name: '&c力量药水 V'
+    potion-type: AWKWARD # 基础药水类型
+    custom-effects: # 自定义药水效果专用
+      strength_effect:
+        type: INCREASE_DAMAGE # 药水ID
+        duration: 6000 # 5分钟 (6000 ticks)
+        amplifier: 4 # V级效果
+        particles: false
+    weight: 5
+
+  # 喷溅型药水示例
+  splash_healing:
+    material: SPLASH_POTION
+    name: '&a喷溅治疗药水'
+    custom-effects:
+      healing_effect:
+        type: HEAL
+        duration: 1 # 瞬间效果
+        amplifier: 1
+    weight: 4

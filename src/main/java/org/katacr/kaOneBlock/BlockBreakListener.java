@@ -45,8 +45,7 @@ public class BlockBreakListener implements Listener {
         Location location = block.getLocation();
 
         // 检查方块是否由本插件生成
-        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByLocation(
-                location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        Map<String, Object> blockInfo = plugin.getDatabaseManager().findBlockByLocation(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (blockInfo == null) {
             // 不是本插件生成的方块，不做处理
@@ -108,20 +107,25 @@ public class BlockBreakListener implements Listener {
         }
 
         // 更新数据库记录
-        final String newBlockType = newBlockObj instanceof Material ?
-                ((Material) newBlockObj).name() : (String) newBlockObj;
+        final String newBlockType = newBlockObj instanceof Material ? ((Material) newBlockObj).name() : (String) newBlockObj;
+
+        // 获取当前进度
+        StageManager.PlayerStageProgress progress =
+                plugin.getStageManager().getPlayerProgress(player.getUniqueId());
+
+        if (progress != null) {
+            plugin.getDatabaseManager().updatePlayerStage(
+                    player.getUniqueId(),
+                    progress.stageFile,
+                    progress.blocksBroken
+            );
+        }
 
         // 如果是宝箱，在数据库中用特殊标记
         if (isChest && chestConfigName != null) {
-            plugin.getDatabaseManager().updateBlockType(
-                    (Integer) blockInfo.get("id"),
-                    "CHEST:" + chestConfigName
-            );
+            plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), "CHEST:" + chestConfigName);
         } else {
-            plugin.getDatabaseManager().updateBlockType(
-                    (Integer) blockInfo.get("id"),
-                    newBlockType
-            );
+            plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), newBlockType);
         }
 
         // 在事件完成后重新放置方块（延迟1 tick）
@@ -219,8 +223,7 @@ public class BlockBreakListener implements Listener {
                 if (finalIsChest) {
                     // 尝试获取语言文件中的宝箱名称
                     String chestNameMsg = plugin.getLanguageManager().getMessage("chest-name");
-                    formattedBlockName = chestNameMsg.startsWith("Message not found") ?
-                            "宝箱" : chestNameMsg;
+                    formattedBlockName = chestNameMsg.startsWith("Message not found") ? "宝箱" : chestNameMsg;
                 } else if (finalNewBlockObj instanceof Material material) {
                     formattedBlockName = plugin.formatMaterialName(material);
                 } else {
