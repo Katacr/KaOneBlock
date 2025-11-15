@@ -1,0 +1,20 @@
+name: KaOneBlock
+version: 1.0
+main: org.katacr.kaOneBlock.KaOneBlock
+api-version: 1.13
+depend: [ItemsAdder]
+commands:
+  kaoneblock:
+    description: KaOneBlock plugin main command
+    usage: /kaoneblock help
+    aliases: [ kob ]
+permissions:
+  kaoneblock.help:
+    description: Allows access to help command
+    default: op
+  kaoneblock.start:
+    description: Allows starting block generation
+    default: op
+  kaoneblock.stop:
+    description: Allows stopping block generation
+    default: op

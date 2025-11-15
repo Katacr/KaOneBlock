@@ -1,0 +1,1496 @@
+# chests/advanced_chest.yml
+name: '高级宝箱' # 宝箱标题
+
+amount:
+  min: 2 # 至少生成2个战利品
+  max: 4 # 至多生成4个战利品
+
+items:
+  # 高价值物品 (权重 1-5)
+  1:
+    material: DIAMOND
+    slot: -1
+    min: 2
+    max: 5
+    weight: 15
+
+  2:
+    material: EMERALD
+    slot: -1
+    min: 3
+    max: 7
+    weight: 12
+
+  3:
+    material: NETHERITE_INGOT
+    slot: -1
+    min: 1
+    max: 2
+    weight: 5
+
+  4:
+    material: ENCHANTED_GOLDEN_APPLE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 3
+
+  5:
+    material: DIAMOND_SWORD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+    enchantments:
+      SHARPNESS: 3
+      FIRE_ASPECT: 2
+
+  6:
+    material: DIAMOND_PICKAXE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+    enchantments:
+      EFFICIENCY: 4
+      FORTUNE: 3
+
+  7:
+    material: DIAMOND_CHESTPLATE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      PROTECTION: 4
+      UNBREAKING: 3
+
+  8:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      MENDING: 1
+
+  9:
+    material: TOTEM_OF_UNDYING
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  10:
+    material: SHULKER_BOX
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+
+  # 中等价值物品 (权重 6-10)
+  11:
+    material: ENDER_PEARL
+    slot: -1
+    min: 3
+    max: 8
+    weight: 10
+
+  12:
+    material: EXPERIENCE_BOTTLE
+    slot: -1
+    min: 5
+    max: 15
+    weight: 12
+
+  13:
+    material: GOLDEN_APPLE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 9
+
+  14:
+    material: HEART_OF_THE_SEA
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  15:
+    material: NETHER_STAR
+    slot: -1
+    min: 1
+    max: 1
+    weight: 3
+
+  16:
+    material: ELYTRA
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  17:
+    material: CONDUIT
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  18:
+    material: BEACON
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  19:
+    material: DRAGON_EGG
+    slot: -1
+    min: 1
+    max: 1
+    weight: 2
+
+  20:
+    material: NETHERITE_SCRAP
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  # 所有唱片 (权重 3-6)
+  21:
+    material: MUSIC_DISC_13
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  22:
+    material: MUSIC_DISC_CAT
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  23:
+    material: MUSIC_DISC_BLOCKS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  24:
+    material: MUSIC_DISC_CHIRP
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  25:
+    material: MUSIC_DISC_FAR
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  26:
+    material: MUSIC_DISC_MALL
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  27:
+    material: MUSIC_DISC_MELLOHI
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  28:
+    material: MUSIC_DISC_STAL
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  29:
+    material: MUSIC_DISC_STRAD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  30:
+    material: MUSIC_DISC_WARD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  31:
+    material: MUSIC_DISC_11
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  32:
+    material: MUSIC_DISC_WAIT
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  33:
+    material: MUSIC_DISC_PIGSTEP
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+
+  # 随机附魔装备 (权重 5-8)
+  34:
+    material: DIAMOND_HELMET
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      PROTECTION: 3
+      UNBREAKING: 2
+
+  35:
+    material: DIAMOND_LEGGINGS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      PROTECTION: 3
+      UNBREAKING: 2
+
+  36:
+    material: DIAMOND_BOOTS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      PROTECTION: 3
+      FEATHER_FALLING: 4
+
+  37:
+    material: IRON_SWORD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+    enchantments:
+      SHARPNESS: 2
+      KNOCKBACK: 1
+
+  38:
+    material: IRON_PICKAXE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+    enchantments:
+      EFFICIENCY: 3
+      FORTUNE: 2
+
+  39:
+    material: IRON_AXE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      EFFICIENCY: 3
+      FORTUNE: 2
+
+  40:
+    material: BOW
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      POWER: 3
+      INFINITY: 1
+
+  # 低价值物品 (权重 10-15)
+  41:
+    material: GOLD_INGOT
+    slot: -1
+    min: 3
+    max: 8
+    weight: 12
+
+  42:
+    material: IRON_INGOT
+    slot: -1
+    min: 5
+    max: 12
+    weight: 14
+
+  43:
+    material: COAL
+    slot: -1
+    min: 8
+    max: 16
+    weight: 15
+
+  44:
+    material: REDSTONE
+    slot: -1
+    min: 8
+    max: 16
+    weight: 13
+
+  45:
+    material: LAPIS_LAZULI
+    slot: -1
+    min: 6
+    max: 12
+    weight: 13
+
+  46:
+    material: QUARTZ
+    slot: -1
+    min: 5
+    max: 10
+    weight: 12
+
+  47:
+    material: GLOWSTONE_DUST
+    slot: -1
+    min: 4
+    max: 8
+    weight: 11
+
+  48:
+    material: BLAZE_ROD
+    slot: -1
+    min: 3
+    max: 6
+    weight: 10
+
+  49:
+    material: GHAST_TEAR
+    slot: -1
+    min: 2
+    max: 4
+    weight: 9
+
+  50:
+    material: MAGMA_CREAM
+    slot: -1
+    min: 3
+    max: 6
+    weight: 10
+
+  # 更多低价值物品 (权重 10-15)
+  51:
+    material: OBSIDIAN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  52:
+    material: CRYING_OBSIDIAN
+    slot: -1
+    min: 2
+    max: 4
+    weight: 10
+
+  53:
+    material: END_STONE
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  54:
+    material: NETHERRACK
+    slot: -1
+    min: 10
+    max: 20
+    weight: 15
+
+  55:
+    material: SOUL_SAND
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  56:
+    material: GLOWSTONE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  57:
+    material: SEA_LANTERN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 11
+
+  58:
+    material: PRISMARINE
+    slot: -1
+    min: 6
+    max: 12
+    weight: 13
+
+  59:
+    material: PRISMARINE_CRYSTALS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  60:
+    material: PRISMARINE_SHARD
+    slot: -1
+    min: 6
+    max: 12
+    weight: 13
+
+  # 食物和消耗品 (权重 10-15)
+  61:
+    material: GOLDEN_CARROT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 13
+
+  62:
+    material: GOLDEN_APPLE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 11
+
+  63:
+    material: COOKED_BEEF
+    slot: -1
+    min: 8
+    max: 16
+    weight: 15
+
+  64:
+    material: COOKED_CHICKEN
+    slot: -1
+    min: 8
+    max: 16
+    weight: 15
+
+  65:
+    material: COOKED_PORKCHOP
+    slot: -1
+    min: 8
+    max: 16
+    weight: 15
+
+  66:
+    material: BAKED_POTATO
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  67:
+    material: BREAD
+    slot: -1
+    min: 8
+    max: 16
+    weight: 15
+
+  68:
+    material: CAKE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+
+  69:
+    material: PUMPKIN_PIE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  70:
+    material: SUSPICIOUS_STEW
+    slot: -1
+    min: 2
+    max: 4
+    weight: 10
+
+  # 稀有植物和材料 (权重 8-12)
+  71:
+    material: CHORUS_FRUIT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 11
+
+  72:
+    material: POPPED_CHORUS_FRUIT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 10
+
+  73:
+    material: NETHER_WART
+    slot: -1
+    min: 6
+    max: 12
+    weight: 12
+
+  74:
+    material: WARPED_FUNGUS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 10
+
+  75:
+    material: CRIMSON_FUNGUS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 10
+
+  76:
+    material: SHROOMLIGHT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 11
+
+  77:
+    material: WARPED_ROOTS
+    slot: -1
+    min: 6
+    max: 12
+    weight: 12
+
+  78:
+    material: CRIMSON_ROOTS
+    slot: -1
+    min: 6
+    max: 12
+    weight: 12
+
+  79:
+    material: TWISTING_VINES
+    slot: -1
+    min: 4
+    max: 8
+    weight: 10
+
+  80:
+    material: WEEPING_VINES
+    slot: -1
+    min: 4
+    max: 8
+    weight: 10
+
+  # 装饰性方块 (权重 10-15)
+  81:
+    material: AMETHYST_SHARD
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  82:
+    material: COPPER_INGOT
+    slot: -1
+    min: 6
+    max: 12
+    weight: 13
+
+  83:
+    material: RAW_COPPER
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  84:
+    material: RAW_GOLD
+    slot: -1
+    min: 6
+    max: 12
+    weight: 12
+
+  85:
+    material: RAW_IRON
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  86:
+    material: DEEPSLATE
+    slot: -1
+    min: 10
+    max: 20
+    weight: 15
+
+  87:
+    material: TUFF
+    slot: -1
+    min: 10
+    max: 20
+    weight: 15
+
+  88:
+    material: CALCITE
+    slot: -1
+    min: 8
+    max: 16
+    weight: 14
+
+  89:
+    material: DRIPSTONE_BLOCK
+    slot: -1
+    min: 6
+    max: 12
+    weight: 13
+
+  90:
+    material: POINTED_DRIPSTONE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 12
+
+  # 工具和实用物品 (权重 8-12)
+  91:
+    material: COMPASS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 10
+
+  92:
+    material: CLOCK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 10
+
+  93:
+    material: MAP
+    slot: -1
+    min: 1
+    max: 1
+    weight: 9
+
+  94:
+    material: SADDLE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+
+  95:
+    material: NAME_TAG
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+
+  96:
+    material: LEAD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+
+  97:
+    material: FISHING_ROD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 9
+    enchantments:
+      LUCK_OF_THE_SEA: 3
+      LURE: 3
+
+  98:
+    material: SHEARS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 10
+    enchantments:
+      EFFICIENCY: 3
+      UNBREAKING: 2
+
+  99:
+    material: FLINT_AND_STEEL
+    slot: -1
+    min: 1
+    max: 1
+    weight: 9
+    enchantments:
+      UNBREAKING: 3
+
+  100:
+    material: SPYGLASS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 8
+
+  101:
+    material: NETHERITE_HELMET
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      PROTECTION: 4
+      UNBREAKING: 3
+
+  102:
+    material: NETHERITE_CHESTPLATE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      PROTECTION: 4
+      UNBREAKING: 3
+
+  103:
+    material: NETHERITE_LEGGINGS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      PROTECTION: 4
+      UNBREAKING: 3
+
+  104:
+    material: NETHERITE_BOOTS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      PROTECTION: 4
+      FEATHER_FALLING: 4
+
+  105:
+    material: NETHERITE_SWORD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      SHARPNESS: 5
+      FIRE_ASPECT: 2
+
+  106:
+    material: NETHERITE_PICKAXE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      EFFICIENCY: 5
+      FORTUNE: 3
+
+  107:
+    material: NETHERITE_AXE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      EFFICIENCY: 5
+      FORTUNE: 3
+
+  108:
+    material: NETHERITE_SHOVEL
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      EFFICIENCY: 5
+      FORTUNE: 3
+
+  109:
+    material: ENCHANTED_GOLDEN_APPLE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  110:
+    material: TOTEM_OF_UNDYING
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  111:
+    material: ELYTRA
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+
+  112:
+    material: SHULKER_BOX
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+
+  113:
+    material: END_CRYSTAL
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  114:
+    material: DRAGON_HEAD
+    slot: -1
+    min: 1
+    max: 1
+    weight: 3
+
+  115:
+    material: DRAGON_BREATH
+    slot: -1
+    min: 2
+    max: 4
+    weight: 5
+
+  116:
+    material: SHULKER_SHELL
+    slot: -1
+    min: 2
+    max: 4
+    weight: 6
+
+  117:
+    material: PHANTOM_MEMBRANE
+    slot: -1
+    min: 3
+    max: 6
+    weight: 7
+
+  118:
+    material: HEART_OF_THE_SEA
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  119:
+    material: NAUTILUS_SHELL
+    slot: -1
+    min: 2
+    max: 4
+    weight: 6
+
+  120:
+    material: TRIDENT
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      IMPALING: 5
+      LOYALTY: 3
+
+  121:
+    material: CONDUIT
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  122:
+    material: SCULK_CATALYST
+    slot: -1
+    min: 1
+    max: 2
+    weight: 6
+
+  123:
+    material: SCULK_SENSOR
+    slot: -1
+    min: 1
+    max: 2
+    weight: 6
+
+  124:
+    material: SCULK_SHRIEKER
+    slot: -1
+    min: 1
+    max: 2
+    weight: 5
+
+  125:
+    material: ECHO_SHARD
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  126:
+    material: RECOVERY_COMPASS
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+
+  127:
+    material: GOAT_HORN
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  128:
+    material: MUSIC_DISC_OTHERSIDE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  129:
+    material: MUSIC_DISC_5
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  130:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 7
+    enchantments:
+      MENDING: 1
+
+  131:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      SOUL_SPEED: 3
+
+  132:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      SWIFT_SNEAK: 3
+
+  133:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      PIERCING: 4
+
+  134:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      MULTISHOT: 1
+
+  135:
+    material: ENCHANTED_BOOK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+    enchantments:
+      QUICK_CHARGE: 3
+
+  136:
+    material: BUDDING_AMETHYST
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  137:
+    material: AMETHYST_CLUSTER
+    slot: -1
+    min: 2
+    max: 4
+    weight: 6
+
+  138:
+    material: LARGE_AMETHYST_BUD
+    slot: -1
+    min: 2
+    max: 4
+    weight: 6
+
+  139:
+    material: MEDIUM_AMETHYST_BUD
+    slot: -1
+    min: 3
+    max: 6
+    weight: 7
+
+  140:
+    material: SMALL_AMETHYST_BUD
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  141:
+    material: SPONGE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  142:
+    material: WET_SPONGE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  143:
+    material: SEA_LANTERN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  144:
+    material: PRISMARINE_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  145:
+    material: DARK_PRISMARINE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  146:
+    material: PURPUR_BLOCK
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  147:
+    material: PURPUR_PILLAR
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  148:
+    material: END_STONE_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  149:
+    material: RED_NETHER_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  150:
+    material: CRACKED_NETHER_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  151:
+    material: CHISELED_NETHER_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  152:
+    material: CRIMSON_NYLIUM
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  153:
+    material: WARPED_NYLIUM
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  154:
+    material: SHROOMLIGHT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  155:
+    material: SOUL_LANTERN
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  156:
+    material: SOUL_TORCH
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  157:
+    material: CHAIN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  158:
+    material: BASALT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  159:
+    material: POLISHED_BASALT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  160:
+    material: SMOOTH_BASALT
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  161:
+    material: BLACKSTONE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  162:
+    material: GILDED_BLACKSTONE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  163:
+    material: CHISELED_POLISHED_BLACKSTONE
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  164:
+    material: CRACKED_POLISHED_BLACKSTONE_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  165:
+    material: POLISHED_BLACKSTONE_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  166:
+    material: CRYING_OBSIDIAN
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  167:
+    material: RESPAWN_ANCHOR
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  168:
+    material: LODESTONE
+    slot: -1
+    min: 1
+    max: 1
+    weight: 6
+
+  169:
+    material: NETHERITE_BLOCK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  170:
+    material: EMERALD_BLOCK
+    slot: -1
+    min: 1
+    max: 2
+    weight: 7
+
+  171:
+    material: DIAMOND_BLOCK
+    slot: -1
+    min: 1
+    max: 2
+    weight: 7
+
+  172:
+    material: GOLD_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 8
+
+  173:
+    material: IRON_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 8
+
+  174:
+    material: COPPER_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 8
+
+  175:
+    material: WAXED_COPPER_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 8
+
+  176:
+    material: HONEYCOMB_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  177:
+    material: AMETHYST_BLOCK
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  178:
+    material: BUDDING_AMETHYST
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  179:
+    material: TINTED_GLASS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  180:
+    material: GLOW_LICHEN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  181:
+    material: SCULK_VEIN
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  182:
+    material: SCULK
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  183:
+    material: SCULK_CATALYST
+    slot: -1
+    min: 1
+    max: 2
+    weight: 6
+
+  184:
+    material: SCULK_SENSOR
+    slot: -1
+    min: 1
+    max: 2
+    weight: 6
+
+  185:
+    material: SCULK_SHRIEKER
+    slot: -1
+    min: 1
+    max: 2
+    weight: 5
+
+  186:
+    material: OCHRE_FROGLIGHT
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  187:
+    material: VERDANT_FROGLIGHT
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  188:
+    material: PEARLESCENT_FROGLIGHT
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  189:
+    material: FROGSPAWN
+    slot: -1
+    min: 1
+    max: 1
+    weight: 5
+
+  190:
+    material: MANGROVE_PROPAGULE
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  191:
+    material: MANGROVE_ROOTS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  192:
+    material: MUDDY_MANGROVE_ROOTS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  193:
+    material: PACKED_MUD
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  194:
+    material: MUD_BRICKS
+    slot: -1
+    min: 4
+    max: 8
+    weight: 8
+
+  195:
+    material: REINFORCED_DEEPSLATE
+    slot: -1
+    min: 1
+    max: 2
+    weight: 5
+
+  196:
+    material: ECHO_SHARD
+    slot: -1
+    min: 2
+    max: 4
+    weight: 7
+
+  197:
+    material: DISC_FRAGMENT_5
+    slot: -1
+    min: 1
+    max: 1
+    weight: 4
+
+  198:
+    material: NETHER_STAR
+    slot: -1
+    min: 1
+    max: 1
+    weight: 3
+
+  199:
+    material: DRAGON_EGG
+    slot: -1
+    min: 1
+    max: 1
+    weight: 2
+
+  200:
+    material: COMMAND_BLOCK
+    slot: -1
+    min: 1
+    max: 1
+    weight: 1

@@ -1,0 +1,59 @@
+# KaOneBlock 语言文件 - 简体中文
+
+# 插件消息
+plugin-enable: "&aKaOneBlock 插件已启用!"
+plugin-disable: "&cKaOneBlock 插件已禁用!"
+config-reloaded: "&a配置已重载!"
+language-loaded: "&a语言文件已加载: %language%"
+
+# 命令消息
+no-permission: "&c你没有权限执行此命令!"
+player-only: "&c此命令只能由玩家执行!"
+unknown-command: "&c未知命令! 输入 /kaoneblock help 查看帮助!"
+block-generated: "&a方块已生成: %block%"
+no-blocks-in-world: "&c当前世界没有生成方块!"
+remove-failed: "&c移除方块失败!"
+already-generated: "&c你已经在当前世界生成过方块!"
+world-type-not-allowed: "&c当前世界类型不允许生成方块!"
+block-removed: "&a已移除你的方块！阶段已重置"
+stage-reset: "&a你的阶段已重置为初始阶段"
+position-not-air: "&c无法生成方块！位置 %location% 已被 %block% 方块占用，请确保脚下是空气！"
+
+# 调试消息
+debug-replaced-block: "在世界 %world% 的位置 (%x%, %y%, %z%) 替换方块为: %block%"
+debug-generated-enhanced-chest: "在世界 %world% 的位置 (%x%, %y%, %z%) 生成宝箱: %chestConfig%"
+debug-generated-block: "在世界 %world% 的位置 (%x%, %y%, %z%) 生成方块: %block%"
+debug-position-not-empty: "位置 (%x%, %y%, %z%) 已被占用，无法放置新方块"
+debug-position-not-air: "位置 %location% 已被 %block% 方块占用，无法生成起始方块"
+
+# 日志消息
+logging-enabled: "&a日志已启用!"
+logging-disabled: "&c日志已禁用!"
+
+# 调试模式消息
+debug-enabled: "&a调试模式已启用!"
+debug-disabled: "&c调试模式已禁用!"
+block-transformed: "&e方块已转换为: %block%"
+
+# ItemsAdder 状态
+ia-status: "&eItemsAdder 状态: &a启用=%enabled% &6加载=%loaded%"
+
+# 帮助消息
+help-header: "&6===== &eKaOneBlock 帮助 &6====="
+help-help: "&e/kaoneblock help &7- 显示此帮助"
+help-start: "&e/kaoneblock start &7- 在当前位置生成初始方块"
+help-stop: "&e/kaoneblock stop &7- 移除你在当前世界生成的方块"
+help-reload: "&e/kaoneblock reload &7- 重载插件配置"
+help-log: "&e/kaoneblock log [on|off] &7- 启用或禁用日志"
+help-debug: "&e/kaoneblock debug [on|off] &7- 启用或禁用调试模式"
+help-ia-status: "&e/kaoneblock ia-status &7- 显示ItemsAdder状态"
+help-more: "&6============================="
+
+# 方块名称
+chest-name: "宝箱"
+stone: "石头"
+dirt: "泥土"
+coal: "煤炭"
+iron-ingot: "铁锭"
+gold-ingot: "金锭"
+diamond: "钻石"

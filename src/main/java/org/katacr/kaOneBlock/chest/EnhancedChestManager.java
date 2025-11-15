@@ -193,19 +193,25 @@ public class EnhancedChestManager {
                 ConfigurationSection enchantsSection = itemSection.getConfigurationSection("enchantments");
                 if (enchantsSection != null) {
                     for (String enchantName : enchantsSection.getKeys(false)) {
-                        // 使用推荐的方法获取附魔
-                        Enchantment enchant;
-
-                        // 首先尝试使用命名空间键获取
+                        // 使用推荐的现代方法获取附魔
+                        Enchantment enchant = null;
+                        
+                        // 尝试使用命名空间键获取
                         try {
                             NamespacedKey key = NamespacedKey.minecraft(enchantName.toLowerCase());
                             enchant = Enchantment.getByKey(key);
                         } catch (Exception e) {
-                            // 回退到弃用方法
-                            enchant = Enchantment.getByName(enchantName.toUpperCase());
-                            if (enchant != null) {
-                                plugin.getLogger().warning("Using deprecated method to get enchantment: " + enchantName);
-                            }
+                            plugin.debug("Failed to get enchantment by key for: " + enchantName);
+                        }
+                        
+                        // 如果仍然找不到，尝试直接查找（避免已弃用的getByName和getName）
+                        if (enchant == null) {
+                            // 使用流式API查找匹配的附魔
+                            enchant = Arrays.stream(Enchantment.values())
+                                .filter(e -> e.getKey().getKey().equalsIgnoreCase(enchantName) || 
+                                           e.getKey().toString().equalsIgnoreCase("minecraft:" + enchantName))
+                                .findFirst()
+                                .orElse(null);
                         }
 
                         if (enchant != null) {
@@ -297,12 +303,23 @@ public class EnhancedChestManager {
 
     // 辅助方法：获取附魔
     private Enchantment getEnchantmentByName(String name) {
+        // 首先尝试使用命名空间键获取
         try {
             NamespacedKey key = NamespacedKey.minecraft(name.toLowerCase());
-            return Enchantment.getByKey(key);
+            Enchantment enchant = Enchantment.getByKey(key);
+            if (enchant != null) {
+                return enchant;
+            }
         } catch (Exception e) {
-            return Enchantment.getByName(name.toUpperCase());
+            plugin.debug("Failed to get enchantment by key for: " + name);
         }
+        
+        // 如果失败，使用流式API查找匹配的附魔（避免已弃用的getByName）
+        return Arrays.stream(Enchantment.values())
+            .filter(e -> e.getKey().getKey().equalsIgnoreCase(name) || 
+                       e.getKey().toString().equalsIgnoreCase("minecraft:" + name))
+            .findFirst()
+            .orElse(null);
     }
 
     // 创建占位物品（标记为需要运行时处理）

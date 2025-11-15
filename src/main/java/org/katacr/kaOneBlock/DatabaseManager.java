@@ -31,6 +31,7 @@ public class DatabaseManager {
             // 检查并添加缺失的列
             addMissingColumnIfNeeded("stage_file", "TEXT", "'normal.yml'");
             addMissingColumnIfNeeded("blocks_broken", "INTEGER", "0");
+            addMissingColumnIfNeeded("block_type", "TEXT", "'STONE'");
 
         } catch (ClassNotFoundException | SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to initialize database", e);
@@ -58,31 +59,7 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * 检查并添加缺失的列
-     */
-    private void addMissingColumnIfNeeded() {
-        try {
-            // 检查 block_type 列是否存在
-            String checkSQL = "SELECT block_type FROM generated_blocks LIMIT 1";
-            try (Statement stmt = connection.createStatement()) {
-                stmt.executeQuery(checkSQL);
-            }
-        } catch (SQLException e) {
-            // 如果列不存在，添加它
-            if (e.getMessage().contains("no such column")) {
-                try (Statement stmt = connection.createStatement()) {
-                    String alterSQL = "ALTER TABLE generated_blocks ADD COLUMN block_type TEXT DEFAULT 'STONE'";
-                    stmt.execute(alterSQL);
-                    plugin.getLogger().info("Added missing column: block_type");
-                } catch (SQLException ex) {
-                    plugin.getLogger().log(Level.SEVERE, "Failed to add column block_type", ex);
-                }
-            } else {
-                plugin.getLogger().log(Level.SEVERE, "Error checking column block_type", e);
-            }
-        }
-    }
+
 
     /**
      * 更新玩家阶段信息

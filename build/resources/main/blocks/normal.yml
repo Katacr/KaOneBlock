@@ -1,0 +1,17 @@
+# normal.yml
+amount: 500  # 需要破坏500个方块进入下一阶段
+next: nether   # 下一阶段的配置(nether.yml)
+message: '&a您已进入平原阶段'   # 开始阶段时的提示
+chests:  # 各个宝箱概率
+  common_chest: 0.03
+  advanced_chest: 0.01
+
+blocks:
+  STONE: 20
+  GRANITE: 15
+  DIORITE: 15
+  ANDESITE: 15
+  COAL_ORE: 10
+  IRON_ORE: 8
+  GOLD_ORE: 5
+  DIAMOND_ORE: 2

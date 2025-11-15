@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +24,7 @@ public class CommandManager implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         // 处理 /kaoneblock 和 /kob 命令
         if (cmd.getName().equalsIgnoreCase("kaoneblock") || cmd.getName().equalsIgnoreCase("kob")) {
             // 如果没有参数或"help"参数，显示帮助
@@ -287,7 +286,7 @@ public class CommandManager implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         List<String> completions = new ArrayList<>();
 
         // 处理 /kaoneblock 和 /kob 命令的标签补全
@@ -351,7 +350,7 @@ public class CommandManager implements TabExecutor {
         return stageFiles;
     }
 
-    private void showHelp(@Nonnull CommandSender sender) {
+    private void showHelp(CommandSender sender) {
         LanguageManager languageManager = plugin.getLanguageManager();
         sender.sendMessage(languageManager.getMessage("help-header"));
 
