@@ -316,4 +316,8 @@ This project is licensed under the [MIT License](LICENSE).
 - Implemented basic block generation and stage system
 - Added chest reward mechanism
 - Support for multi-language and ItemsAdder integration
+<<<<<<< HEAD
 - Complete command and permission system
+=======
+- Complete command and permission system
+>>>>>>> 98a088fbaf8739c33aba726d944b9acf828079f8
