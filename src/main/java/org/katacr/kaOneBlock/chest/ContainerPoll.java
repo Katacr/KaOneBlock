@@ -13,8 +13,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ContainerPoll {
     private final KaOneBlock plugin;
     private final ContainerItem[] items;
-    private final int min;
-    private final int max;
+    private final int min; 
+    private final int max; 
 
     public ContainerPoll(KaOneBlock plugin, int min, int max, ContainerItem[] items) {
         this.plugin = plugin;
