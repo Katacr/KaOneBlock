@@ -1,4 +1,4 @@
-﻿package org.katacr.kaOneBlock;
+package org.katacr.kaOneBlock;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -136,8 +136,8 @@ public class EntityManager {
                 entity.setCustomNameVisible(true);
             }
 
-            plugin.debug("生成实体: " + config.name + " 在位置 " + 
-                       location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
+            plugin.debug("生成实体: " + config.name + " 在位置 " +
+                    location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
             return entity;
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "生成实体失败: " + packName, e);

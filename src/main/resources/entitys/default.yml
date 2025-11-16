@@ -1,0 +1,21 @@
+# 默认实体包配置
+list:
+  zombie:
+    name: "普通僵尸"
+    type: "ZOMBIE"
+    weight: 10
+  
+  skeleton:
+    name: "普通骷髅"
+    type: "SKELETON"
+    weight: 8
+  
+  spider:
+    name: "普通蜘蛛"
+    type: "SPIDER"
+    weight: 5
+  
+  creeper:
+    name: "苦力怕"
+    type: "CREEPER"
+    weight: 3

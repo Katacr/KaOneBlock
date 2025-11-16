@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,9 +135,11 @@ public class BlockBreakListener implements Listener {
             );
         }
 
-        // 如果是宝箱，在数据库中用特殊标记
+        // 如果是宝箱或实体，在数据库中用特殊标记
         if (isChest && chestConfigName != null) {
             plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), "CHEST:" + chestConfigName);
+        } else if (isEntity) {
+            plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), "ENTITY");
         } else {
             plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), newBlockType);
         }
@@ -146,10 +149,73 @@ public class BlockBreakListener implements Listener {
         boolean finalIsChest = isChest;
         boolean finalIsEntity = isEntity;
         String finalChestConfigName = chestConfigName;
+        
+        // 获取当前阶段的实体包名称
+        String finalEntityPackName = "default"; // 默认实体包
+        if (stageConfig != null && !stageConfig.entityPack.isEmpty()) {
+            finalEntityPackName = stageConfig.entityPack;
+        }
+        
+        // 将需要传递给lambda的变量声明为final
+        final String finalEntityPackNameFinal = finalEntityPackName;
+        
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             // 检查位置是否仍然是空气（确保没有其他方块被放置）
             if (location.getBlock().getType() == Material.AIR) {
-                if (finalIsChest) {
+                if (finalIsEntity) {
+                    // 生成实体（使用已传递的实体包名称）
+                    EntityManager.EntityConfig entityConfig = plugin.getEntityManager().getRandomEntity(finalEntityPackNameFinal);
+                    if (entityConfig != null) {
+                        LivingEntity entity = plugin.getEntityManager().spawnEntity(location, finalEntityPackNameFinal);
+                        
+                        if (entity != null) {
+                            // 记录调试信息
+                            World world = location.getWorld();
+                            String worldName = world != null ? world.getName() : "未知世界";
+                            Map<String, String> debugReplacements = new HashMap<>();
+                            debugReplacements.put("world", worldName);
+                            debugReplacements.put("x", String.valueOf(location.getBlockX()));
+                            debugReplacements.put("y", String.valueOf(location.getBlockY()));
+                            debugReplacements.put("z", String.valueOf(location.getBlockZ()));
+                            debugReplacements.put("entityName", entityConfig.name);
+                            debugReplacements.put("entityPack", finalEntityPackNameFinal);
+                            plugin.debug("debug-generated-entity", debugReplacements);
+                            
+                            // 记录日志
+                            plugin.getLogManager().logEntityGeneration(player.getName(), location, entityConfig.name, finalEntityPackNameFinal);
+                        }
+                        
+                        // 在实体生成后，在相同位置生成一个方块，以便继续游戏
+                        if (finalNewBlockObj instanceof Material material) {
+                            location.getBlock().setType(material);
+                        } else {
+                            // ItemsAdder 方块
+                            String iaBlockId = (String) finalNewBlockObj;
+                            // 去掉 "ia:" 前缀
+                            String realBlockId = iaBlockId.substring(3);
+                            boolean success = plugin.getItemsAdderManager().placeBlock(location, realBlockId);
+                            if (!success) {
+                                // 放置失败，使用石头作为回退
+                                location.getBlock().setType(Material.STONE);
+                                plugin.debug("Failed to place ItemsAdder block: " + realBlockId + ", using STONE instead");
+                            }
+                        }
+                        
+                        // 记录方块生成调试信息
+                        World world2 = location.getWorld();
+                        String worldName2 = world2 != null ? world2.getName() : "未知世界";
+                        Map<String, String> debugReplacements2 = new HashMap<>();
+                        debugReplacements2.put("world", worldName2);
+                        debugReplacements2.put("x", String.valueOf(location.getBlockX()));
+                        debugReplacements2.put("y", String.valueOf(location.getBlockY()));
+                        debugReplacements2.put("z", String.valueOf(location.getBlockZ()));
+                        debugReplacements2.put("block", newBlockType);
+                        plugin.debug("debug-generated-block", debugReplacements2);
+                        
+                        // 记录日志
+                        plugin.getLogManager().logBlockReplacement(player.getName(), location, newBlockType);
+                    }
+                } else if (finalIsChest) {
                     // 检查是否已经处理过这个位置的宝箱
                     if (processedChests.contains(location)) {
                         plugin.debug("Chest already processed at " + location);
