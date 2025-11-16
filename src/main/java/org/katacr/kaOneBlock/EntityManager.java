@@ -153,12 +153,9 @@ public class EntityManager {
                 entity.setCustomNameVisible(true);
             }
 
-<<<<<<< HEAD
             // 应用装备配置
             applyArmors(entity, config.armors);
 
-=======
->>>>>>> 3057cb29083b14fc9bf8706d99904c04c4de7953
             plugin.debug("生成实体: " + config.name + " 在位置 " +
                     location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
             return entity;

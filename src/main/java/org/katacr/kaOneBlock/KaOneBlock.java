@@ -159,7 +159,6 @@ public final class KaOneBlock extends JavaPlugin {
         if (!entitysDir.exists() && !entitysDir.mkdirs()) {
             getLogger().warning("Failed to create entitys directory: " + entitysDir.getAbsolutePath());
         } else {
-<<<<<<< HEAD
             // 保存所有实体配置文件
             String[] entityFiles = {
                 "default.yml",
@@ -179,11 +178,6 @@ public final class KaOneBlock extends JavaPlugin {
             }
             
             getLogger().info("Created entitys directory and saved " + savedCount + " entity files");
-=======
-            // 保存默认实体配置文件
-            saveResource("entitys/default.yml", false);
-            getLogger().info("Created entitys directory and saved default files");
->>>>>>> 3057cb29083b14fc9bf8706d99904c04c4de7953
         }
     }
 
