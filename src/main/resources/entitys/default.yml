@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 # 默认实体包配置 - 地表生物
 list:
   # 敌对生物
+=======
+# 默认实体包配置
+list:
+>>>>>>> 3057cb29083b14fc9bf8706d99904c04c4de7953
   zombie:
     name: "普通僵尸"
     type: "ZOMBIE"
@@ -19,6 +24,7 @@ list:
   creeper:
     name: "苦力怕"
     type: "CREEPER"
+<<<<<<< HEAD
     weight: 3
     
   enderman:
@@ -87,3 +93,6 @@ list:
     name: "铁傀儡"
     type: "IRON_GOLEM"
     weight: 2
+=======
+    weight: 3
+>>>>>>> 3057cb29083b14fc9bf8706d99904c04c4de7953
