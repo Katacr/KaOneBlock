@@ -2,7 +2,7 @@ name: KaOneBlock
 version: 1.0
 main: org.katacr.kaOneBlock.KaOneBlock
 api-version: 1.13
-depend: [ItemsAdder]
+softdepend: [ItemsAdder]
 commands:
   kaoneblock:
     description: KaOneBlock plugin main command

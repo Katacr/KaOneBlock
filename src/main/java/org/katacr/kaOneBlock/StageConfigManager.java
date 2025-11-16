@@ -68,6 +68,16 @@ public class StageConfigManager {
                 }
             }
         }
+        
+        // 加载实体包配置
+        if (yaml.isString("entity_pack")) {
+            config.entityPack = yaml.getString("entity_pack", "");
+        }
+        
+        // 加载实体生成概率
+        if (yaml.isDouble("entity_chance")) {
+            config.entityChance = yaml.getDouble("entity_chance", 0.05);
+        }
 
         // 缓存配置
         configCache.put(fileName, config);

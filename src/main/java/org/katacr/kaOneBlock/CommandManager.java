@@ -122,11 +122,15 @@ public class CommandManager implements TabExecutor {
                     return true;
                 }
 
-                // 初始化玩家进度 - 这会发送初始阶段消息
+                // 初始化玩家进度 - 不发送消息
                 plugin.getStageManager().initPlayerProgress(player);
 
                 // 生成起始方块
                 plugin.getBlockGenerator().generateBlockAtPlayerLocation(player);
+                
+                // 发送阶段消息（只在实际开始游戏时）
+                String currentStage = plugin.getStageManager().getCurrentStageFile(player.getUniqueId());
+                plugin.getStageManager().setPlayerStageAndSendMessage(player, currentStage);
                 return true;
             }
 

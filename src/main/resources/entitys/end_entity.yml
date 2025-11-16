@@ -1,0 +1,39 @@
+list:
+  shulker: # 实体的id
+    name: '潜影贝' # 实体的name_tag
+    type: SHULKER # 实体类型
+    weight: 15 # 权重范围 0~100
+    
+  endermite: # 实体的id
+    name: '末影人' # 实体的name_tag
+    type: ENDERMITE # 实体类型
+    weight: 10 # 权重范围 0~100
+    armors: # 装备
+      helmet: DIAMOND_HELMET 
+      chestplate: DIAMOND_CHESTPLATE
+      leggings: DIAMOND_LEGGINGS
+      boots: DIAMOND_BOOTS
+      
+  enderman: # 实体的id
+    name: '末影人' # 实体的name_tag
+    type: ENDERMAN # 实体类型
+    weight: 5 # 权重范围 0~100
+    armors: # 装备
+      mainhand: DIAMOND_SWORD
+    
+  elder_guardian: # 实体的id
+    name: '远古守卫者' # 实体的name_tag
+    type: ELDER_GUARDIAN # 实体类型
+    weight: 8 # 权重范围 0~100
+    
+  witch: # 实体的id
+    name: '女巫' # 实体的name_tag
+    type: WITCH # 实体类型
+    weight: 12 # 权重范围 0~100
+    armors: # 装备
+      helmet: CHAINMAIL_HELMET 
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+      mainhand: BOW 
+      offhand: POTION

@@ -22,6 +22,7 @@ position-not-air: "&c无法生成方块！位置 %location% 已被 %block% 方�
 # 调试消息
 debug-replaced-block: "在世界 %world% 的位置 (%x%, %y%, %z%) 替换方块为: %block%"
 debug-generated-enhanced-chest: "在世界 %world% 的位置 (%x%, %y%, %z%) 生成宝箱: %chestConfig%"
+debug-generated-entity: "在世界 %world% 的位置 (%x%, %y%, %z%) 生成实体: %entityName% 来自实体包: %entityPack%"
 debug-generated-block: "在世界 %world% 的位置 (%x%, %y%, %z%) 生成方块: %block%"
 debug-position-not-empty: "位置 (%x%, %y%, %z%) 已被占用，无法放置新方块"
 debug-position-not-air: "位置 %location% 已被 %block% 方块占用，无法生成起始方块"

@@ -24,8 +24,8 @@ public class StageManager {
     public void initPlayerProgress(Player player) {
         UUID playerId = player.getUniqueId();
         if (!playerProgress.containsKey(playerId)) {
-            // 默认从 normal.yml 开始
-            setPlayerStage(player, "normal.yml");
+            // 默认从 normal.yml 开始（但不发送消息）
+            setPlayerStageWithoutMessage(player, "normal.yml");
         }
     }
 
@@ -81,8 +81,8 @@ public class StageManager {
             if (progress != null) {
                 playerProgress.put(playerId, progress);
             } else {
-                // 新玩家：设置初始阶段
-                setPlayerStage(player, "normal.yml");
+                // 新玩家：设置初始阶段（但不发送消息）
+                setPlayerStageWithoutMessage(player, "normal.yml");
             }
         }
     }
@@ -225,6 +225,48 @@ public class StageManager {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
             plugin.debug("发送阶段消息: " + config.message);
         }
+
+        // 更新数据库
+        plugin.getDatabaseManager().updatePlayerStage(playerId, stageFile, 0);
+    }
+
+    /**
+     * 设置玩家阶段（但不发送消息）
+     *
+     * @param player    玩家
+     * @param stageFile 阶段配置文件
+     */
+    public void setPlayerStageWithoutMessage(Player player, String stageFile) {
+        if (player == null) {
+            plugin.getLogger().warning("Cannot set stage for null player");
+            return;
+        }
+
+        UUID playerId = player.getUniqueId();
+
+        // 确保文件名有扩展名
+        if (!stageFile.endsWith(".yml")) {
+            stageFile += ".yml";
+        }
+
+        // 加载阶段配置
+        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
+        if (config == null) {
+            plugin.getLogger().warning("无法加载阶段配置: " + stageFile);
+            return;
+        }
+
+        // 设置或更新玩家进度
+        PlayerStageProgress progress = playerProgress.get(playerId);
+        if (progress == null) {
+            progress = new PlayerStageProgress(stageFile, 0);
+            playerProgress.put(playerId, progress);
+        } else {
+            progress.stageFile = stageFile;
+            progress.blocksBroken = 0; // 重置破坏计数
+        }
+
+        plugin.debug("设置玩家 " + player.getName() + " 阶段: " + stageFile + " (不发送消息)");
 
         // 更新数据库
         plugin.getDatabaseManager().updatePlayerStage(playerId, stageFile, 0);

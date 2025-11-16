@@ -1,0 +1,42 @@
+list:
+  wither_skeleton: # 实体的id
+    name: '凋灵骷髅' # 实体的name_tag
+    type: WITHER_SKELETON # 实体类型
+    weight: 10 # 权重范围 0~100
+    armors: # 装备
+      helmet: NETHERITE_HELMET 
+      chestplate: NETHERITE_CHESTPLATE
+      leggings: NETHERITE_LEGGINGS
+      boots: NETHERITE_BOOTS
+      mainhand: STONE_SWORD 
+    
+  blaze: # 实体的id
+    name: '烈焰人' # 实体的name_tag
+    type: BLAZE # 实体类型
+    weight: 15 # 权重范围 0~100
+    armors: # 装备
+      helmet: GOLD_HELMET 
+      chestplate: GOLD_CHESTPLATE
+      leggings: GOLD_LEGGINGS
+      boots: GOLD_BOOTS
+      
+  magma_cube: # 实体的id
+    name: '岩浆怪' # 实体的name_tag
+    type: MAGMA_CUBE # 实体类型
+    weight: 5 # 权重范围 0~100
+    
+  ghast: # 实体的id
+    name: '恶魂' # 实体的name_tag
+    type: GHAST # 实体类型
+    weight: 8 # 权重范围 0~100
+    
+  piglin_brute: # 实体的id
+    name: '猪灵蛮兵' # 实体的name_tag
+    type: PIGLIN_BRUTE # 实体类型
+    weight: 12 # 权重范围 0~100
+    armors: # 装备
+      helmet: IRON_HELMET 
+      chestplate: IRON_CHESTPLATE
+      leggings: IRON_LEGGINGS
+      boots: IRON_BOOTS
+      mainhand: IRON_AXE 

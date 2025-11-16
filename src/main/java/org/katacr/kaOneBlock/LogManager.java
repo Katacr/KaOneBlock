@@ -131,6 +131,33 @@ public class LogManager {
     }
 
     /**
+     * 记录实体生成日志
+     */
+    public void logEntityGeneration(String player, Location location, String entityName, String entityPack) {
+        if (!enabled) return;
+
+        Date now = new Date();
+        String dateStr = dateFormat.format(now);
+        String timeStr = timeFormat.format(now);
+
+        File logFile = new File(logDirectory, dateStr + ".log");
+
+        // 从位置获取世界名称
+        World world = location.getWorld();
+        String worldName = world != null ? world.getName() : "未知世界";
+
+        String locationStr = String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+        String logMessage = "[" + timeStr + "] " + player + " 在世界 " + worldName + " 的位置 " + locationStr + " 生成实体: " + entityName + " 来自实体包: " + entityPack;
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
+            writer.println(logMessage);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to write to log file", e);
+        }
+    }
+
+    /**
      * 更新日志状态
      */
     public void setEnabled(boolean enabled) {

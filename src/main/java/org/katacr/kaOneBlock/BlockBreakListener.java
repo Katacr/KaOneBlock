@@ -63,12 +63,25 @@ public class BlockBreakListener implements Listener {
 
         // 检查是否应该生成宝箱
         boolean isChest = false;
+        boolean isEntity = false;
         String chestConfigName = null;
 
-        if (!chestChances.isEmpty()) {
+        // 获取实体生成概率
+        StageConfig stageConfig = plugin.getStageConfigManager().loadStageConfig(
+            plugin.getStageManager().getCurrentStageFile(player.getUniqueId()));
+        double entityChance = stageConfig != null ? stageConfig.entityChance : 0.05;
+
+        // 随机决定生成内容
+        double random = Math.random();
+        
+        // 优先级：实体 > 宝箱 > 方块
+        if (random <= entityChance) {
+            // 生成实体（5%）
+            isEntity = true;
+        } else if (!chestChances.isEmpty()) {
             // 使用阶段特定的宝箱概率
             for (Map.Entry<String, Double> entry : chestChances.entrySet()) {
-                if (Math.random() <= entry.getValue()) {
+                if (random <= entry.getValue() + entityChance) {
                     isChest = true;
                     chestConfigName = entry.getKey();
                     break;
@@ -77,7 +90,7 @@ public class BlockBreakListener implements Listener {
         } else {
             // 使用全局宝箱概率
             double chestChance = plugin.getConfig().getDouble("chest-chance", 0.05);
-            if (Math.random() <= chestChance) {
+            if (random <= chestChance + entityChance) {
                 isChest = true;
                 chestConfigName = plugin.getEnhancedChestManager().getRandomChestConfig();
             }
@@ -128,9 +141,10 @@ public class BlockBreakListener implements Listener {
             plugin.getDatabaseManager().updateBlockType((Integer) blockInfo.get("id"), newBlockType);
         }
 
-        // 在事件完成后重新放置方块（延迟1 tick）
+        // 在事件完成后重新放置方块/生成实体（延迟1 tick）
         Object finalNewBlockObj = newBlockObj;
         boolean finalIsChest = isChest;
+        boolean finalIsEntity = isEntity;
         String finalChestConfigName = chestConfigName;
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             // 检查位置是否仍然是空气（确保没有其他方块被放置）

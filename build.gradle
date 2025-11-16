@@ -30,7 +30,9 @@ dependencies {
     implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
     compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
     compileOnly 'jakarta.annotation:jakarta.annotation-api:2.1.1' // 替代 javax.annotation
-    compileOnly('dev.lone:api-itemsadder:4.0.10')
+    compileOnly('dev.lone:api-itemsadder:4.0.10') {
+        transitive = false  // 避免传递依赖
+    }
 }
 
 tasks {

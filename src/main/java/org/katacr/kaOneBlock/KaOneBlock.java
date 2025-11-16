@@ -23,6 +23,7 @@ public final class KaOneBlock extends JavaPlugin {
     private EnhancedChestManager enhancedChestManager;
     private LogManager logManager;
     private ItemsAdderManager itemsAdderManager;
+    private EntityManager entityManager;
 
     // 位置信息工具方法
     public static Map<String, String> createDebugReplacements(Location location) {
@@ -68,6 +69,9 @@ public final class KaOneBlock extends JavaPlugin {
         // 初始化 ItemsAdder 管理器
         itemsAdderManager = new ItemsAdderManager(this);
         enhancedChestManager = new EnhancedChestManager(this);
+        
+        // 初始化实体管理器
+        entityManager = new EntityManager(this);
 
         // 初始化日志管理器
         logManager = new LogManager(this);
@@ -249,6 +253,10 @@ public final class KaOneBlock extends JavaPlugin {
 
     public ItemsAdderManager getItemsAdderManager() {
         return itemsAdderManager;
+    }
+    
+    public EntityManager getEntityManager() {
+        return entityManager;
     }
 
     public boolean isDebugEnabled() {

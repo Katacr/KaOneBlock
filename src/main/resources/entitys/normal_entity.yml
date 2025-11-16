@@ -1,0 +1,23 @@
+list:
+  super_zombie: # 实体的id
+    name: '超级僵尸' # 实体的name_tag
+    type: ZOMBIE # 实体类型
+    weight: 10 # 权重范围 0~100
+    armors: # 装备
+      helmet: DIAMOND_HELMET 
+      chests: DIAMOND_CHESTPLATE
+      leggings: DIAMOND_LEGGINGS
+      boots: DIAMOND_BOOTS
+      mainhand: DIAMOND_SWORD 
+      offhand: SHIELD
+    
+  advanced_skeleton: # 实体的id
+    name: '高级骷髅' # 实体的name_tag
+    type: SKELETON # 实体类型
+    weight: 15 # 权重范围 0~100
+    armors: # 装备
+      helmet: DIAMOND_HELMET 
+      mainhand: BOW
+    
+
+

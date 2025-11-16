@@ -30,7 +30,7 @@ KaOneBlock 是一个基于 Spigot/Paper 的 Minecraft 插件，实现了类似"�
 - Java 17 或更高版本
 - Minecraft 1.18.2 (兼容 1.13+)
 - Spigot/Paper 服务器
-- [ItemsAdder] 插件 (可选)
+- [ItemsAdder] 插件 (可选，用于自定义物品和方块)
 
 ### 安装步骤
 1. 下载最新版本的 KaOneBlock.jar
@@ -188,7 +188,7 @@ KaOneBlock is a Minecraft plugin based on Spigot/Paper that implements a "One Bl
 - Java 17 or higher
 - Minecraft 1.18.2 (compatible with 1.13+)
 - Spigot/Paper server
-- [ItemsAdder] plugin (optional)
+- [ItemsAdder] plugin (optional, for custom items and blocks)
 
 ### Installation Steps
 1. Download the latest version of KaOneBlock.jar

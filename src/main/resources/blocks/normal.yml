@@ -1,7 +1,8 @@
 # normal.yml
 amount: 500  # 需要破坏500个方块进入下一阶段
-next: nether   # 下一阶段的配置(nether.yml)
 message: '&a您已进入平原阶段'   # 开始阶段时的提示
+next: nether   # 下一阶段的配置(nether.yml)
+entity_pack: normal_entity # 实体包
 chests:  # 各个宝箱概率
   common_chest: 0.03
   advanced_chest: 0.01

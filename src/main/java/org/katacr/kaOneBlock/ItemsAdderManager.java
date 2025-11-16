@@ -1,8 +1,5 @@
 package org.katacr.kaOneBlock;
 
-import dev.lone.itemsadder.api.CustomBlock;
-import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -17,11 +14,17 @@ import java.util.logging.Level;
 /**
  * ItemsAdder 管理器
  * 处理 ItemsAdder 相关功能
+ * 
+ * 这个类使用反射来检测和使用 ItemsAdder，避免在未安装 ItemsAdder 时出现 ClassNotFoundException
  */
 public class ItemsAdderManager {
     private final JavaPlugin plugin;
     private boolean enabled = false;
     private boolean loaded = false;
+    
+    // 反射类
+    private Class<?> customStackClass;
+    private Class<?> customBlockClass;
 
     public ItemsAdderManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -39,10 +42,16 @@ public class ItemsAdderManager {
             plugin.getLogger().warning("ItemsAdder is not available, cannot get custom item: " + itemId);
             return null;
         }
+        
+        if (customStackClass == null) {
+            return null;
+        }
+        
         try {
-            CustomStack customStack = CustomStack.getInstance(itemId);
+            // 使用反射调用 CustomStack.getInstance
+            Object customStack = customStackClass.getMethod("getInstance", String.class).invoke(null, itemId);
             if (customStack != null) {
-                return customStack.getItemStack();
+                return (ItemStack) customStackClass.getMethod("getItemStack").invoke(customStack);
             }
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Failed to get custom item: " + itemId, e);
@@ -59,15 +68,27 @@ public class ItemsAdderManager {
         if (itemsAdderPlugin != null && itemsAdderPlugin.isEnabled()) {
             enabled = true;
             plugin.getLogger().info("ItemsAdder detected, enabling integration");
-
-            // 检查 ItemsAdder 数据是否已加载
-            if (isItemsAdderDataLoaded()) {
-                loaded = true;
-                plugin.getLogger().info("ItemsAdder data loaded");
-            } else {
-                plugin.getLogger().info("Waiting for ItemsAdder data to load...");
-                // 注册事件监听器等待数据加载
-                Bukkit.getPluginManager().registerEvents(new ItemsAdderListener(), plugin);
+            
+            // 尝试加载 ItemsAdder 类
+            try {
+                ClassLoader classLoader = itemsAdderPlugin.getClass().getClassLoader();
+                
+                // 加载必要的类
+                customStackClass = Class.forName("dev.lone.itemsadder.api.CustomStack", false, classLoader);
+                customBlockClass = Class.forName("dev.lone.itemsadder.api.CustomBlock", false, classLoader);
+                
+                // 检查 ItemsAdder 数据是否已加载
+                if (isItemsAdderDataLoaded()) {
+                    loaded = true;
+                    plugin.getLogger().info("ItemsAdder data loaded");
+                } else {
+                    plugin.getLogger().info("Waiting for ItemsAdder data to load...");
+                    // 注册事件监听器等待数据加载
+                    Bukkit.getPluginManager().registerEvents(new ItemsAdderListener(), plugin);
+                }
+            } catch (ClassNotFoundException e) {
+                plugin.getLogger().warning("Failed to load ItemsAdder classes: " + e.getMessage());
+                enabled = false;
             }
         } else {
             plugin.getLogger().info("ItemsAdder not found, custom blocks will not work");
@@ -80,9 +101,13 @@ public class ItemsAdderManager {
      * @return 是否已加载
      */
     private boolean isItemsAdderDataLoaded() {
+        if (customBlockClass == null) {
+            return false;
+        }
+        
         try {
             // 尝试获取一个自定义方块实例
-            CustomBlock customBlock = CustomBlock.getInstance("dirt");
+            Object customBlock = customBlockClass.getMethod("getInstance", String.class).invoke(null, "dirt");
             return customBlock != null;
         } catch (Exception e) {
             return false;
@@ -102,12 +127,16 @@ public class ItemsAdderManager {
             return false;
         }
 
+        if (customBlockClass == null) {
+            return false;
+        }
+
         try {
             // 尝试获取自定义方块实例
-            CustomBlock customBlock = CustomBlock.getInstance(blockId);
+            Object customBlock = customBlockClass.getMethod("getInstance", String.class).invoke(null, blockId);
             if (customBlock != null) {
                 // 放置方块
-                customBlock.place(location);
+                customBlockClass.getMethod("place", Location.class).invoke(customBlock, location);
 
                 return true;
             } else {
@@ -122,10 +151,10 @@ public class ItemsAdderManager {
 
     // 添加新方法：静默获取物品（不记录警告）
     public ItemStack getCustomItemSilently(String itemId) {
-        if (!enabled || !loaded) return null;
+        if (!enabled || !loaded || customStackClass == null) return null;
         try {
-            CustomStack customStack = CustomStack.getInstance(itemId);
-            return (customStack != null) ? customStack.getItemStack() : null;
+            Object customStack = customStackClass.getMethod("getInstance", String.class).invoke(null, itemId);
+            return (customStack != null) ? (ItemStack) customStackClass.getMethod("getItemStack").invoke(customStack) : null;
         } catch (Exception e) {
             return null;
         }
@@ -153,10 +182,10 @@ public class ItemsAdderManager {
     /**
      * ItemsAdder 事件监听器
      */
-
     private class ItemsAdderListener implements Listener {
+        // 使用反射处理事件，避免直接依赖 ItemsAdder 类
         @EventHandler
-        public void onItemsAdderLoad(ItemsAdderLoadDataEvent event) {
+        public void onItemsAdderLoad(Object event) {
             loaded = true;
             plugin.getLogger().info("ItemsAdder data loaded, API ready");
 
