@@ -1,39 +1,91 @@
+# 末地生物包配置
 list:
-  shulker: # 实体的id
-    name: '潜影贝' # 实体的name_tag
-    type: SHULKER # 实体类型
-    weight: 15 # 权重范围 0~100
+  # 敌对生物
+  shulker:
+    name: '潜影贝'
+    type: SHULKER
+    weight: 15
     
-  endermite: # 实体的id
-    name: '末影人' # 实体的name_tag
-    type: ENDERMITE # 实体类型
-    weight: 10 # 权重范围 0~100
-    armors: # 装备
+  endermite:
+    name: '末影螨'
+    type: ENDERMITE
+    weight: 10
+    armors:
       helmet: DIAMOND_HELMET 
       chestplate: DIAMOND_CHESTPLATE
       leggings: DIAMOND_LEGGINGS
       boots: DIAMOND_BOOTS
       
-  enderman: # 实体的id
-    name: '末影人' # 实体的name_tag
-    type: ENDERMAN # 实体类型
-    weight: 5 # 权重范围 0~100
-    armors: # 装备
+  enderman:
+    name: '末影人'
+    type: ENDERMAN
+    weight: 8
+    armors:
       mainhand: DIAMOND_SWORD
+      
+  elder_guardian:
+    name: '远古守卫者'
+    type: ELDER_GUARDIAN
+    weight: 8
     
-  elder_guardian: # 实体的id
-    name: '远古守卫者' # 实体的name_tag
-    type: ELDER_GUARDIAN # 实体类型
-    weight: 8 # 权重范围 0~100
-    
-  witch: # 实体的id
-    name: '女巫' # 实体的name_tag
-    type: WITCH # 实体类型
-    weight: 12 # 权重范围 0~100
-    armors: # 装备
+  witch:
+    name: '女巫'
+    type: WITCH
+    weight: 12
+    armors:
       helmet: CHAINMAIL_HELMET 
       chestplate: CHAINMAIL_CHESTPLATE
       leggings: CHAINMAIL_LEGGINGS
       boots: CHAINMAIL_BOOTS
       mainhand: BOW 
       offhand: POTION
+      
+  # 末地特有生物
+  ender_dragon:
+    name: '末影龙'
+    type: ENDER_DRAGON
+    weight: 2
+    
+  phantom:
+    name: '幻翼'
+    type: PHANTOM
+    weight: 6
+    
+  guardian:
+    name: '守卫者'
+    type: GUARDIAN
+    weight: 8
+    
+  # 稀有生物
+  ender_giant:
+    name: '末影巨人'
+    type: GIANT
+    weight: 1
+    armors:
+      helmet: NETHERITE_HELMET
+      chestplate: NETHERITE_CHESTPLATE
+      leggings: NETHERITE_LEGGINGS
+      boots: NETHERITE_BOOTS
+      mainhand: DIAMOND_SWORD
+      
+  # 中立生物
+  ender_cat:
+    name: '末影猫'
+    type: CAT
+    weight: 4
+    
+  # 友好生物
+  ender_villager:
+    name: '末影村民'
+    type: VILLAGER
+    weight: 5
+    
+  # 末地稀有生物
+  ender_witch:
+    name: '末影女巫'
+    type: WITCH
+    weight: 3
+    armors:
+      helmet: DIAMOND_HELMET
+      chestplate: DIAMOND_CHESTPLATE
+      mainhand: BOW

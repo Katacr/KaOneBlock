@@ -62,6 +62,9 @@ public final class KaOneBlock extends JavaPlugin {
         createLangDirectory();
         createBlockDirectory();
         createChestsDirectory(); // 创建宝箱目录
+        createEntitysDirectory(); // 创建实体目录
+        createEntitysDirectory(); // 创建实体目录
+        createEntitysDirectory(); // 创建实体目录
 
         // 加载配置
         reloadConfig();
@@ -148,6 +151,33 @@ public final class KaOneBlock extends JavaPlugin {
             saveResource("chests/end_chest.yml", false);
             saveResource("chests/nether_chest.yml", false);
             getLogger().info("Created chests directory and saved default files");
+        }
+    }
+
+    private void createEntitysDirectory() {
+        File entitysDir = new File(getDataFolder(), "entitys");
+        if (!entitysDir.exists() && !entitysDir.mkdirs()) {
+            getLogger().warning("Failed to create entitys directory: " + entitysDir.getAbsolutePath());
+        } else {
+            // 保存所有实体配置文件
+            String[] entityFiles = {
+                "default.yml",
+                "normal_entity.yml", 
+                "nether_entity.yml",
+                "end_entity.yml"
+            };
+            
+            int savedCount = 0;
+            for (String entityFile : entityFiles) {
+                try {
+                    saveResource("entitys/" + entityFile, false);
+                    savedCount++;
+                } catch (Exception e) {
+                    getLogger().warning("Failed to save entity file: " + entityFile + " - " + e.getMessage());
+                }
+            }
+            
+            getLogger().info("Created entitys directory and saved " + savedCount + " entity files");
         }
     }
 

@@ -1,42 +1,88 @@
+# 下界生物包配置
 list:
-  wither_skeleton: # 实体的id
-    name: '凋灵骷髅' # 实体的name_tag
-    type: WITHER_SKELETON # 实体类型
-    weight: 10 # 权重范围 0~100
-    armors: # 装备
+  # 敌对生物
+  wither_skeleton:
+    name: '凋灵骷髅'
+    type: WITHER_SKELETON
+    weight: 10
+    armors:
       helmet: NETHERITE_HELMET 
       chestplate: NETHERITE_CHESTPLATE
       leggings: NETHERITE_LEGGINGS
       boots: NETHERITE_BOOTS
       mainhand: STONE_SWORD 
     
-  blaze: # 实体的id
-    name: '烈焰人' # 实体的name_tag
-    type: BLAZE # 实体类型
-    weight: 15 # 权重范围 0~100
-    armors: # 装备
+  blaze:
+    name: '烈焰人'
+    type: BLAZE
+    weight: 15
+    armors:
       helmet: GOLD_HELMET 
       chestplate: GOLD_CHESTPLATE
       leggings: GOLD_LEGGINGS
       boots: GOLD_BOOTS
       
-  magma_cube: # 实体的id
-    name: '岩浆怪' # 实体的name_tag
-    type: MAGMA_CUBE # 实体类型
-    weight: 5 # 权重范围 0~100
+  magma_cube:
+    name: '岩浆怪'
+    type: MAGMA_CUBE
+    weight: 5
     
-  ghast: # 实体的id
-    name: '恶魂' # 实体的name_tag
-    type: GHAST # 实体类型
-    weight: 8 # 权重范围 0~100
+  ghast:
+    name: '恶魂'
+    type: GHAST
+    weight: 8
     
-  piglin_brute: # 实体的id
-    name: '猪灵蛮兵' # 实体的name_tag
-    type: PIGLIN_BRUTE # 实体类型
-    weight: 12 # 权重范围 0~100
-    armors: # 装备
+  piglin_brute:
+    name: '猪灵蛮兵'
+    type: PIGLIN_BRUTE
+    weight: 12
+    armors:
       helmet: IRON_HELMET 
       chestplate: IRON_CHESTPLATE
       leggings: IRON_LEGGINGS
       boots: IRON_BOOTS
-      mainhand: IRON_AXE 
+      mainhand: IRON_AXE
+      
+  zombified_piglin:
+    name: '僵尸猪灵'
+    type: ZOMBIFIED_PIGLIN
+    weight: 8
+    armors:
+      helmet: GOLD_HELMET
+      mainhand: GOLD_SWORD
+      
+  hoglin:
+    name: '疣猪兽'
+    type: HOGLIN
+    weight: 6
+    
+  piglin:
+    name: '猪灵'
+    type: PIGLIN
+    weight: 8
+    armors:
+      helmet: GOLD_HELMET
+      mainhand: GOLD_SWORD
+      
+  strider:
+    name: '炽足兽'
+    type: STRIDER
+    weight: 10
+    
+  # 稀有敌对生物
+  wither:
+    name: '凋灵'
+    type: WITHER
+    weight: 1
+    
+  # 友好生物
+  pig:
+    name: '猪'
+    type: PIG
+    weight: 5
+    
+  # 中立生物
+  magma_cube_baby:
+    name: '小岩浆怪'
+    type: MAGMA_CUBE
+    weight: 3 

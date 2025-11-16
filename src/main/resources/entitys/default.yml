@@ -1,0 +1,89 @@
+# 默认实体包配置 - 地表生物
+list:
+  # 敌对生物
+  zombie:
+    name: "普通僵尸"
+    type: "ZOMBIE"
+    weight: 10
+  
+  skeleton:
+    name: "普通骷髅"
+    type: "SKELETON"
+    weight: 8
+  
+  spider:
+    name: "普通蜘蛛"
+    type: "SPIDER"
+    weight: 5
+  
+  creeper:
+    name: "苦力怕"
+    type: "CREEPER"
+    weight: 3
+    
+  enderman:
+    name: "末影人"
+    type: "ENDERMAN"
+    weight: 2
+    
+  witch:
+    name: "女巫"
+    type: "WITCH"
+    weight: 3
+    
+  husk:
+    name: "尸壳"
+    type: "HUSK"
+    weight: 4
+    
+  stray:
+    name: "流浪者"
+    type: "STRAY"
+    weight: 3
+    
+  cave_spider:
+    name: "洞穴蜘蛛"
+    type: "CAVE_SPIDER"
+    weight: 4
+    
+  # 中立生物
+  pig:
+    name: "猪"
+    type: "PIG"
+    weight: 8
+    
+  cow:
+    name: "牛"
+    type: "COW"
+    weight: 8
+    
+  sheep:
+    name: "羊"
+    type: "SHEEP"
+    weight: 8
+    
+  chicken:
+    name: "鸡"
+    type: "CHICKEN"
+    weight: 8
+    
+  wolf:
+    name: "狼"
+    type: "WOLF"
+    weight: 5
+    
+  ocelot:
+    name: "豹猫"
+    type: "OCELOT"
+    weight: 3
+    
+  # 友好生物
+  villager:
+    name: "村民"
+    type: "VILLAGER"
+    weight: 6
+    
+  iron_golem:
+    name: "铁傀儡"
+    type: "IRON_GOLEM"
+    weight: 2

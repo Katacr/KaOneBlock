@@ -1,11 +1,12 @@
 list:
+  # 敌对生物 (10个)
   super_zombie: # 实体的id
     name: '超级僵尸' # 实体的name_tag
     type: ZOMBIE # 实体类型
-    weight: 10 # 权重范围 0~100
+    weight: 8 # 权重范围 0~100
     armors: # 装备
       helmet: DIAMOND_HELMET 
-      chests: DIAMOND_CHESTPLATE
+      chestplate: DIAMOND_CHESTPLATE
       leggings: DIAMOND_LEGGINGS
       boots: DIAMOND_BOOTS
       mainhand: DIAMOND_SWORD 
@@ -14,10 +15,96 @@ list:
   advanced_skeleton: # 实体的id
     name: '高级骷髅' # 实体的name_tag
     type: SKELETON # 实体类型
-    weight: 15 # 权重范围 0~100
+    weight: 7 # 权重范围 0~100
     armors: # 装备
       helmet: DIAMOND_HELMET 
       mainhand: BOW
     
-
-
+  armored_spider: # 实体的id
+    name: '装甲蜘蛛' # 实体的name_tag
+    type: SPIDER # 实体类型
+    weight: 6 # 权重范围 0~100
+    armors: # 装备
+      helmet: IRON_HELMET
+      mainhand: IRON_SWORD
+    
+  explosive_creeper: # 实体的id
+    name: '爆破苦力怕' # 实体的name_tag
+    type: CREEPER # 实体类型
+    weight: 5 # 权重范围 0~100
+    
+  elite_enderman: # 实体的id
+    name: '精英末影人' # 实体的name_tag
+    type: ENDERMAN # 实体类型
+    weight: 4 # 权重范围 0~100
+    armors: # 装备
+      chestplate: CHAINMAIL_CHESTPLATE
+      mainhand: STONE_SWORD
+    
+  magical_witch: # 实体的id
+    name: '魔法女巫' # 实体的name_tag
+    type: WITCH # 实体类型
+    weight: 4 # 权重范围 0~100
+    
+  desert_zombie: # 实体的id
+    name: '沙漠僵尸' # 实体的name_tag
+    type: HUSK # 实体类型
+    weight: 5 # 权重范围 0~100
+    armors: # 装备
+      helmet: GOLDEN_HELMET
+      mainhand: GOLDEN_SWORD
+    
+  arctic_skeleton: # 实体的id
+    name: '寒冰骷髅' # 实体的name_tag
+    type: STRAY # 实体类型
+    weight: 3 # 权重范围 0~100
+    mainhand: BOW
+    
+  venomous_spider: # 实体的id
+    name: '剧毒蜘蛛' # 实体的name_tag
+    type: CAVE_SPIDER # 实体类型
+    weight: 4 # 权重范围 0~100
+    
+  ghastly_zombie: # 实体的id
+    name: '幽灵僵尸' # 实体的name_tag
+    type: DROWNED # 实体类型
+    weight: 3 # 权重范围 0~100
+    armors: # 装备
+      mainhand: TRIDENT
+    
+  # 中立生物 (3个)
+  wild_wolf: # 实体的id
+    name: '野生狼' # 实体的name_tag
+    type: WOLF # 实体类型
+    weight: 10 # 权重范围 0~100
+    
+  jungle_ocelot: # 实体的id
+    name: '丛林豹猫' # 实体的name_tag
+    type: OCELOT # 实体类型
+    weight: 8 # 权重范围 0~100
+    
+  polar_bear: # 实体的id
+    name: '北极熊' # 实体的name_tag
+    type: POLAR_BEAR # 实体类型
+    weight: 5 # 权重范围 0~100
+    
+  # 友好生物 (4个)
+  friendly_pig: # 实体的id
+    name: '友好猪猪' # 实体的name_tag
+    type: PIG # 实体类型
+    weight: 12 # 权重范围 0~100
+    
+  dairy_cow: # 实体的id
+    name: '奶牛' # 实体的name_tag
+    type: COW # 实体类型
+    weight: 15 # 权重范围 0~100
+    
+  woolly_sheep: # 实体的id
+    name: '绵羊' # 实体的name_tag
+    type: SHEEP # 实体类型
+    weight: 10 # 权重范围 0~100
+    
+  farm_chicken: # 实体的id
+    name: '农场鸡' # 实体的name_tag
+    type: CHICKEN # 实体类型
+    weight: 8 # 权重范围 0~100
