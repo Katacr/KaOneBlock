@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 group = 'org.katacr'
@@ -16,32 +15,14 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' } // Spigot仓库
-    maven { url 'https://repo.eclipse.org/content/groups/releases/' } // 添加 Eclipse 仓库
-
-    maven {
-        name = "matteodev"
-        url = "https://maven.devs.beer/"
-    }
 }
 
 dependencies {
-    implementation 'org.jetbrains:annotations:24.1.0'
-    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
+    implementation 'org.xerial:sqlite-jdbc:3.50.3.0'
     compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
-    compileOnly 'jakarta.annotation:jakarta.annotation-api:2.1.1' // 替代 javax.annotation
-    compileOnly('dev.lone:api-itemsadder:4.0.10') {
-        transitive = false  // 避免传递依赖
-    }
-}
-
-tasks {
-    runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.18")
-    }
+    testImplementation("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 def targetJavaVersion = 17
@@ -69,4 +50,20 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+tasks.named('jar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    from {
+        configurations.runtimeClasspath.collect { dependency ->
+            dependency.isDirectory() ? dependency : zipTree(dependency)
+        }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

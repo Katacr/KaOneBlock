@@ -15,10 +15,10 @@ list:
     type: BLAZE # 实体类型
     weight: 15 # 权重范围 0~100
     armors: # 装备
-      helmet: GOLD_HELMET 
-      chestplate: GOLD_CHESTPLATE
-      leggings: GOLD_LEGGINGS
-      boots: GOLD_BOOTS
+      helmet: GOLDEN_HELMET 
+      chestplate: GOLDEN_CHESTPLATE
+      leggings: GOLDEN_LEGGINGS
+      boots: GOLDEN_BOOTS
       
   magma_cube: # 实体的id
     name: '岩浆怪' # 实体的name_tag

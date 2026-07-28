@@ -69,4 +69,15 @@ public class LanguageManager {
     public String getMessage(String key) {
         return ChatColor.translateAlternateColorCodes('&', currentLang.getString(key, "Message not found: " + key));
     }
+
+    /**
+     * Resolves a localized message and replaces all named percent placeholders.
+     */
+    public String getMessage(String key, Map<String, String> replacements) {
+        String message = getMessage(key);
+        for (Map.Entry<String, String> replacement : replacements.entrySet()) {
+            message = message.replace("%" + replacement.getKey() + "%", replacement.getValue());
+        }
+        return message;
+    }
 }

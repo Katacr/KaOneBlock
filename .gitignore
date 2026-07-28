@@ -1,0 +1,96 @@
+# Gradle and build outputs
+.gradle/
+**/build/
+/out/
+/bin/
+/target/
+/classes/
+
+# Compiled and packaged Java artifacts
+*.class
+*.jar
+*.war
+*.ear
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/
+
+# Eclipse and Buildship
+.classpath
+.project
+.settings/
+.factorypath
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/dist/
+
+# Local Minecraft server runtime
+/run/
+/server/
+/plugins/
+/logs/
+/cache/
+/libraries/
+/versions/
+/crash-reports/
+/world/
+/world_nether/
+/world_the_end/
+/bukkit.yml
+/commands.yml
+/eula.txt
+/help.yml
+/ops.json
+/paper-global.yml
+/paper-world-defaults.yml
+/permissions.yml
+/server.properties
+/spigot.yml
+/usercache.json
+/whitelist.json
+/banned-ips.json
+/banned-players.json
+
+# Runtime databases and JVM diagnostics
+*.db
+*.db-shm
+*.db-wal
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Local environment and machine-specific settings
+.env
+.env.*
+!.env.example
+local.properties
+/.cache/
+/.tmp/
+/tmp/
+
+# Editor backups and temporary files
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+
+# Operating system metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+/.gradle/

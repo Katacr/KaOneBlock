@@ -1,293 +1,232 @@
 package org.katacr.kaOneBlock;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Maintains in-memory player stage state and coordinates explicit persistence updates.
+ */
 public class StageManager {
     private final KaOneBlock plugin;
     private final Map<UUID, PlayerStageProgress> playerProgress = new HashMap<>();
 
     public StageManager(KaOneBlock plugin) {
         this.plugin = plugin;
+        loadAllPlayerProgress();
     }
 
     /**
-     * 初始化玩家进度
+     * Hydrates the stage cache from the database's world-aware record cache.
      */
-    public void initPlayerProgress(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!playerProgress.containsKey(playerId)) {
-            // 默认从 normal.yml 开始（但不发送消息）
-            setPlayerStageWithoutMessage(player, "normal.yml");
-        }
-    }
-
-    // 文档15: StageManager.java
     public void loadAllPlayerProgress() {
-        Map<UUID, PlayerStageProgress> progressMap = plugin.getDatabaseManager().loadAllPlayerProgress();
-
         playerProgress.clear();
-        playerProgress.putAll(progressMap);
+        playerProgress.putAll(plugin.getDatabaseManager().loadAllPlayerProgress());
     }
 
     /**
-     * 设置玩家阶段并发送开始消息
+     * Initializes a player's stage from persisted state or the configured starting stage.
      */
-    public void setPlayerStageAndSendMessage(Player player, String stageFile) {
-        UUID playerId = player.getUniqueId();
-
-        // 确保文件名有扩展名
-        if (!stageFile.endsWith(".yml")) {
-            stageFile += ".yml";
-        }
-
-        // 加载阶段配置
-        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
-        if (config == null) return;
-
-        // 设置或更新玩家进度
-        PlayerStageProgress progress = playerProgress.get(playerId);
-        if (progress == null) {
-            progress = new PlayerStageProgress(stageFile, 0);
-            playerProgress.put(playerId, progress);
-        } else {
-            progress.stageFile = stageFile;
-            progress.blocksBroken = 0;
-        }
-
-        plugin.debug("设置玩家 " + player.getName() + " 阶段: " + stageFile);
-
-        // 发送阶段开始消息
-        if (config.message != null && !config.message.isEmpty()) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
-            plugin.debug("发送阶段消息: " + config.message);
-        }
-    }
-
-    // StageManager.java
-    public void onPlayerJoin(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!playerProgress.containsKey(playerId)) {
-            // 从数据库加载进度
-            PlayerStageProgress progress = plugin.getDatabaseManager().loadPlayerProgress(playerId);
-
-            if (progress != null) {
-                playerProgress.put(playerId, progress);
-            } else {
-                // 新玩家：设置初始阶段（但不发送消息）
-                setPlayerStageWithoutMessage(player, "normal.yml");
-            }
-        }
+    public PlayerStageProgress initPlayerProgress(Player player) {
+        return playerProgress.computeIfAbsent(player.getUniqueId(), ignored ->
+                new PlayerStageProgress(getStartingStageFile(), 0));
     }
 
     /**
-     * 获取玩家当前阶段配置文件名
+     * Loads a joining player's cached stage without resetting an existing record.
+     */
+    public void onPlayerJoin(Player player) {
+        initPlayerProgress(player);
+    }
+
+    /**
+     * Increments progress, performs at most one stage transition and returns the resulting state.
+     */
+    public PlayerStageProgress incrementBlocksBroken(Player player) {
+        PlayerStageProgress progress = initPlayerProgress(player);
+        progress.blocksBroken++;
+        plugin.debug("玩家 " + player.getName() + " 破坏方块数: " + progress.blocksBroken);
+        checkStageAdvancement(player, progress);
+        return progress;
+    }
+
+    /**
+     * Returns the current stage filename, falling back to the configured starting stage.
      */
     public String getCurrentStageFile(UUID playerId) {
         PlayerStageProgress progress = playerProgress.get(playerId);
-        return progress != null ? progress.stageFile : "normal.yml";
+        return progress == null ? getStartingStageFile() : progress.stageFile;
     }
 
     /**
-     * 增加玩家破坏方块计数
+     * Returns the current stage configuration for a player when it is valid.
      */
-    public void incrementBlocksBroken(UUID playerId) {
-        PlayerStageProgress progress = playerProgress.get(playerId);
-        if (progress != null) {
-            progress.blocksBroken++;
-            plugin.debug("玩家 " + Objects.requireNonNull(Bukkit.getPlayer(playerId)).getName() + " 破坏方块数: " + progress.blocksBroken);
-
-            // 检查是否需要进入下一阶段
-            checkStageAdvancement(playerId, progress);
-        }
+    public StageConfig getCurrentStageConfig(UUID playerId) {
+        return plugin.getStageConfigManager().loadStageConfig(getCurrentStageFile(playerId));
     }
 
     /**
-     * 重置玩家阶段为指定阶段
-     */
-    public void resetPlayerStage(Player player, String stageFile) {
-        UUID playerId = player.getUniqueId();
-
-        // 确保文件名有扩展名
-        if (!stageFile.endsWith(".yml")) {
-            stageFile += ".yml";
-        }
-
-        // 加载阶段配置
-        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
-        if (config == null) return;
-
-        // 设置玩家进度
-        PlayerStageProgress progress = playerProgress.get(playerId);
-        if (progress == null) {
-            progress = new PlayerStageProgress(stageFile, 0);
-            playerProgress.put(playerId, progress);
-        } else {
-            progress.stageFile = stageFile;
-            progress.blocksBroken = 0;
-        }
-
-        plugin.debug("重置玩家 " + player.getName() + " 阶段: " + stageFile);
-
-        // 发送阶段开始消息
-        if (config.message != null && !config.message.isEmpty()) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
-            plugin.debug("发送阶段消息: " + config.message);
-        }
-    }
-
-    /**
-     * 检查玩家是否应该进入下一阶段
-     */
-    private void checkStageAdvancement(UUID playerId, PlayerStageProgress progress) {
-        // 加载当前阶段配置
-        StageConfig currentConfig = plugin.getStageConfigManager().loadStageConfig(progress.stageFile);
-        if (currentConfig == null) return;
-
-        // 检查是否达到阶段要求
-        if (progress.blocksBroken >= currentConfig.amount) {
-            // 切换到下一阶段
-            String nextStage = currentConfig.nextStage;
-            if (!nextStage.endsWith(".yml")) {
-                nextStage += ".yml";
-            }
-
-            // 检查文件是否存在
-            File nextStageFile = new File(plugin.getDataFolder(), "blocks/" + nextStage);
-            if (!nextStageFile.exists()) {
-                plugin.getLogger().warning("下一阶段配置文件不存在: " + nextStageFile.getAbsolutePath());
-                return;
-            }
-
-            Player player = Bukkit.getPlayer(playerId);
-            if (player != null) {
-                setPlayerStageAndSendMessage(player, nextStage);
-            }
-        }
-    }
-
-    /**
-     * 获取玩家当前阶段的宝箱概率配置
+     * Returns the current stage's immutable chest chance mapping.
      */
     public Map<String, Double> getChestChances(UUID playerId) {
-        String stageFile = getCurrentStageFile(playerId);
-        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
-        return config != null ? config.chestChances : new HashMap<>();
+        StageConfig config = getCurrentStageConfig(playerId);
+        return config == null ? Map.of() : config.chestChances;
     }
 
     /**
-     * 设置玩家阶段（强制设置）
-     *
-     * @param player    玩家
-     * @param stageFile 阶段配置文件
+     * Forcefully sets and persists a player's stage and sends its configured message.
      */
-    public void setPlayerStage(Player player, String stageFile) {
-        if (player == null) {
-            plugin.getLogger().warning("Cannot set stage for null player");
-            return;
-        }
-
-        UUID playerId = player.getUniqueId();
-
-        // 确保文件名有扩展名
-        if (!stageFile.endsWith(".yml")) {
-            stageFile += ".yml";
-        }
-
-        // 加载阶段配置
-        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
-        if (config == null) {
-            plugin.getLogger().warning("无法加载阶段配置: " + stageFile);
-            return;
-        }
-
-        // 设置或更新玩家进度
-        PlayerStageProgress progress = playerProgress.get(playerId);
-        if (progress == null) {
-            progress = new PlayerStageProgress(stageFile, 0);
-            playerProgress.put(playerId, progress);
-        } else {
-            progress.stageFile = stageFile;
-            progress.blocksBroken = 0; // 重置破坏计数
-        }
-
-        plugin.debug("设置玩家 " + player.getName() + " 阶段: " + stageFile + " (重置计数)");
-
-        // 发送阶段开始消息
-        if (config.message != null && !config.message.isEmpty()) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
-            plugin.debug("发送阶段消息: " + config.message);
-        }
-
-        // 更新数据库
-        plugin.getDatabaseManager().updatePlayerStage(playerId, stageFile, 0);
+    public boolean setPlayerStage(Player player, String stageFile) {
+        return setStage(player, stageFile, true, true);
     }
 
     /**
-     * 设置玩家阶段（但不发送消息）
-     *
-     * @param player    玩家
-     * @param stageFile 阶段配置文件
+     * Resets and persists a player's stage for the administrative reset command.
      */
-    public void setPlayerStageWithoutMessage(Player player, String stageFile) {
-        if (player == null) {
-            plugin.getLogger().warning("Cannot set stage for null player");
-            return;
-        }
-
-        UUID playerId = player.getUniqueId();
-
-        // 确保文件名有扩展名
-        if (!stageFile.endsWith(".yml")) {
-            stageFile += ".yml";
-        }
-
-        // 加载阶段配置
-        StageConfig config = plugin.getStageConfigManager().loadStageConfig(stageFile);
-        if (config == null) {
-            plugin.getLogger().warning("无法加载阶段配置: " + stageFile);
-            return;
-        }
-
-        // 设置或更新玩家进度
-        PlayerStageProgress progress = playerProgress.get(playerId);
-        if (progress == null) {
-            progress = new PlayerStageProgress(stageFile, 0);
-            playerProgress.put(playerId, progress);
-        } else {
-            progress.stageFile = stageFile;
-            progress.blocksBroken = 0; // 重置破坏计数
-        }
-
-        plugin.debug("设置玩家 " + player.getName() + " 阶段: " + stageFile + " (不发送消息)");
-
-        // 更新数据库
-        plugin.getDatabaseManager().updatePlayerStage(playerId, stageFile, 0);
+    public boolean resetPlayerStage(Player player, String stageFile) {
+        return setStage(player, stageFile, true, true);
     }
 
-    // 添加公共方法获取玩家进度
+    /**
+     * Sends the current stage message without mutating or resetting progress.
+     */
+    public void sendCurrentStageMessage(Player player) {
+        StageConfig config = getCurrentStageConfig(player.getUniqueId());
+        if (config != null) {
+            sendStageMessage(player, config);
+        }
+    }
+
+    /**
+     * Removes transient stage state after a player's OneBlock record is deleted.
+     */
+    public void clearPlayerProgress(UUID playerId) {
+        playerProgress.remove(playerId);
+    }
+
+    /**
+     * Restores a previous persisted snapshot when a scheduled world replacement cannot complete.
+     */
+    public void restoreProgress(UUID playerId, String stageFile, int blocksBroken) {
+        playerProgress.put(playerId, new PlayerStageProgress(stageFile, blocksBroken));
+    }
+
+    /**
+     * Returns the mutable main-thread stage state used by the gameplay pipeline.
+     */
     public PlayerStageProgress getPlayerProgress(UUID playerId) {
         return playerProgress.get(playerId);
     }
 
     /**
-     * 玩家阶段进度内部类
+     * Advances to a configured next stage and treats a blank next value as a terminal stage.
      */
+    private void checkStageAdvancement(Player player, PlayerStageProgress progress) {
+        StageConfig current = plugin.getStageConfigManager().loadStageConfig(progress.stageFile);
+        if (current == null || progress.blocksBroken < current.amount || current.nextStage.isBlank()) {
+            return;
+        }
 
+        String nextStage;
+        try {
+            nextStage = StageConfigManager.normalizeStageFile(current.nextStage);
+        } catch (IllegalArgumentException exception) {
+            plugin.getLogger().warning("下一阶段文件名无效: " + current.nextStage);
+            return;
+        }
+        StageConfig next = plugin.getStageConfigManager().loadStageConfig(nextStage);
+        if (next == null) {
+            plugin.getLogger().warning("下一阶段配置无效: " + nextStage);
+            return;
+        }
+
+        progress.stageFile = nextStage;
+        progress.blocksBroken = 0;
+        sendStageMessage(player, next);
+        plugin.debug("玩家 " + player.getName() + " 进入阶段: " + nextStage);
+    }
+
+    /**
+     * Applies one validated stage mutation and optionally persists and announces it.
+     */
+    private boolean setStage(Player player, String stageFile, boolean sendMessage, boolean persist) {
+        String normalized;
+        try {
+            normalized = StageConfigManager.normalizeStageFile(stageFile);
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+        StageConfig config = plugin.getStageConfigManager().loadStageConfig(normalized);
+        if (config == null) {
+            return false;
+        }
+
+        PlayerStageProgress progress = playerProgress.computeIfAbsent(
+                player.getUniqueId(),
+                ignored -> new PlayerStageProgress(normalized, 0)
+        );
+        progress.stageFile = normalized;
+        progress.blocksBroken = 0;
+
+        if (persist) {
+            plugin.getDatabaseManager().findBlockByPlayer(player.getUniqueId()).ifPresent(record ->
+                    plugin.getDatabaseManager().updateState(player.getUniqueId(), record.blockType(), normalized, 0));
+        }
+        if (sendMessage) {
+            sendStageMessage(player, config);
+        }
+        return true;
+    }
+
+    /**
+     * Sends a translated stage message when the stage defines one.
+     */
+    private void sendStageMessage(Player player, StageConfig config) {
+        if (config.message != null && !config.message.isBlank()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', config.message));
+        }
+    }
+
+    /**
+     * Resolves and normalizes the configured starting stage.
+     */
+    private String getStartingStageFile() {
+        String configured = plugin.getConfig().getString("start-list", "normal");
+        try {
+            return StageConfigManager.normalizeStageFile(configured);
+        } catch (IllegalArgumentException exception) {
+            plugin.getLogger().warning("start-list 配置无效，已回退到 normal.yml: " + configured);
+            return "normal.yml";
+        }
+    }
+
+    /**
+     * Mutable main-thread state for a player's current stage and progress counter.
+     */
     public static class PlayerStageProgress {
-        public String stageFile;
-        public int blocksBroken;
+        private String stageFile;
+        private int blocksBroken;
 
         public PlayerStageProgress(String stageFile, int blocksBroken) {
             this.stageFile = stageFile;
             this.blocksBroken = blocksBroken;
+        }
+
+        /**
+         * Returns the normalized current stage filename.
+         */
+        public String stageFile() {
+            return stageFile;
+        }
+
+        /**
+         * Returns the number of blocks broken in the current stage.
+         */
+        public int blocksBroken() {
+            return blocksBroken;
         }
     }
 }

@@ -5,7 +5,7 @@ list:
     weight: 10 # 权重范围 0~100
     armors: # 装备
       helmet: DIAMOND_HELMET 
-      chests: DIAMOND_CHESTPLATE
+      chestplate: DIAMOND_CHESTPLATE
       leggings: DIAMOND_LEGGINGS
       boots: DIAMOND_BOOTS
       mainhand: DIAMOND_SWORD 

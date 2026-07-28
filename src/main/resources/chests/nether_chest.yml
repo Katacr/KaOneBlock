@@ -496,7 +496,7 @@ items:
 
 
   68:
-    material: PIGLIN_HEAD
+    material: ZOMBIE_HEAD
     slot: -1
     min: 1
     max: 1
@@ -709,7 +709,7 @@ items:
     weight: 6
 
   95:
-    material: GOAT_HORN
+    material: BELL
     slot: -1
     min: 1
     max: 1
@@ -860,7 +860,7 @@ items:
     weight: 5
 
   115:
-    material: TADPOLE_BUCKET
+    material: AXOLOTL_BUCKET
     slot: -1
     min: 1
     max: 1
@@ -1084,14 +1084,14 @@ items:
     weight: 5
 
   147:
-    material: IRON_GOLEM_SPAWN_EGG
+    material: WOLF_SPAWN_EGG
     slot: -1
     min: 1
     max: 1
     weight: 5
 
   148:
-    material: SNOW_GOLEM_SPAWN_EGG
+    material: POLAR_BEAR_SPAWN_EGG
     slot: -1
     min: 1
     max: 1
@@ -1435,7 +1435,7 @@ items:
     weight: 5
 
   198:
-    material: SNOW_GOLEM_SPAWN_EGG
+    material: STRAY_SPAWN_EGG
     slot: -1
     min: 1
     max: 1

@@ -2,7 +2,7 @@ package org.katacr.kaOneBlock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 权重随机选择器
@@ -10,7 +10,6 @@ import java.util.Random;
  */
 public class WeightedRandom<T> {
     private final List<Entry<T>> entries = new ArrayList<>();
-    private final Random random = new Random();
     private double totalWeight = 0;
 
     /**
@@ -20,8 +19,9 @@ public class WeightedRandom<T> {
      * @param weight 权重
      */
     public void add(T item, double weight) {
-        if (weight <= 0) return;
-        totalWeight += weight;
+        double updatedTotal = totalWeight + weight;
+        if (!Double.isFinite(weight) || weight <= 0 || !Double.isFinite(updatedTotal)) return;
+        totalWeight = updatedTotal;
         entries.add(new Entry<>(item, totalWeight));
     }
 
@@ -32,7 +32,7 @@ public class WeightedRandom<T> {
      */
     public T getRandom() {
         if (entries.isEmpty()) return null;
-        double value = random.nextDouble() * totalWeight;
+        double value = ThreadLocalRandom.current().nextDouble(totalWeight);
         for (Entry<T> entry : entries) {
             if (value < entry.cumulativeWeight) {
                 return entry.item;

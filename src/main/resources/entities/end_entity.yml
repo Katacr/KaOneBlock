@@ -5,7 +5,7 @@ list:
     weight: 15 # 权重范围 0~100
     
   endermite: # 实体的id
-    name: '末影人' # 实体的name_tag
+    name: '末影螨' # 实体的name_tag
     type: ENDERMITE # 实体类型
     weight: 10 # 权重范围 0~100
     armors: # 装备

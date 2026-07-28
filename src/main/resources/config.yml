@@ -1,7 +1,7 @@
 # KaOneBlock 配置文件
 
 # 调试模式
-debug: true
+debug: false
 
 # 日志设置
 log: true
@@ -11,3 +11,6 @@ language: "zh_CN"
 
 # 默认的方块列表配置名称
 start-list: normal
+
+# 旧数据库记录没有世界信息时用于安全迁移；必须是已加载的世界名称
+legacy-world: world

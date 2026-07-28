@@ -761,7 +761,7 @@ items:
     weight: 9
 
   107:
-    material: MANGROVE_PROPAGULE
+    material: OAK_SAPLING
     slot: -1
     min: 2
     max: 4

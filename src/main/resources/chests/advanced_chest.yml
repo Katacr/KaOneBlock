@@ -931,7 +931,7 @@ items:
     weight: 5
 
   122:
-    material: SCULK_CATALYST
+    material: AMETHYST_BLOCK
     slot: -1
     min: 1
     max: 2
@@ -945,28 +945,28 @@ items:
     weight: 6
 
   124:
-    material: SCULK_SHRIEKER
+    material: OBSIDIAN
     slot: -1
     min: 1
     max: 2
     weight: 5
 
   125:
-    material: ECHO_SHARD
+    material: AMETHYST_SHARD
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   126:
-    material: RECOVERY_COMPASS
+    material: COMPASS
     slot: -1
     min: 1
     max: 1
     weight: 6
 
   127:
-    material: GOAT_HORN
+    material: BELL
     slot: -1
     min: 1
     max: 1
@@ -980,7 +980,7 @@ items:
     weight: 5
 
   129:
-    material: MUSIC_DISC_5
+    material: MUSIC_DISC_OTHERSIDE
     slot: -1
     min: 1
     max: 1
@@ -1011,7 +1011,7 @@ items:
     max: 1
     weight: 6
     enchantments:
-      SWIFT_SNEAK: 3
+      PROTECTION: 3
 
   133:
     material: ENCHANTED_BOOK
@@ -1356,21 +1356,21 @@ items:
     weight: 8
 
   181:
-    material: SCULK_VEIN
+    material: GLOW_LICHEN
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   182:
-    material: SCULK
+    material: MOSS_BLOCK
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   183:
-    material: SCULK_CATALYST
+    material: AMETHYST_BLOCK
     slot: -1
     min: 1
     max: 2
@@ -1384,91 +1384,91 @@ items:
     weight: 6
 
   185:
-    material: SCULK_SHRIEKER
+    material: OBSIDIAN
     slot: -1
     min: 1
     max: 2
     weight: 5
 
   186:
-    material: OCHRE_FROGLIGHT
+    material: SEA_LANTERN
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   187:
-    material: VERDANT_FROGLIGHT
+    material: GLOWSTONE
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   188:
-    material: PEARLESCENT_FROGLIGHT
+    material: SHROOMLIGHT
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   189:
-    material: FROGSPAWN
+    material: TURTLE_EGG
     slot: -1
     min: 1
     max: 1
     weight: 5
 
   190:
-    material: MANGROVE_PROPAGULE
+    material: OAK_SAPLING
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   191:
-    material: MANGROVE_ROOTS
+    material: ROOTED_DIRT
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   192:
-    material: MUDDY_MANGROVE_ROOTS
+    material: ROOTED_DIRT
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   193:
-    material: PACKED_MUD
+    material: CLAY
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   194:
-    material: MUD_BRICKS
+    material: BRICKS
     slot: -1
     min: 4
     max: 8
     weight: 8
 
   195:
-    material: REINFORCED_DEEPSLATE
+    material: DEEPSLATE_BRICKS
     slot: -1
     min: 1
     max: 2
     weight: 5
 
   196:
-    material: ECHO_SHARD
+    material: AMETHYST_SHARD
     slot: -1
     min: 2
     max: 4
     weight: 7
 
   197:
-    material: DISC_FRAGMENT_5
+    material: PRISMARINE_SHARD
     slot: -1
     min: 1
     max: 1

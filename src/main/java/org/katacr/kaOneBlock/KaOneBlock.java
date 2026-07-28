@@ -4,14 +4,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.katacr.kaOneBlock.chest.EnhancedChestManager;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+/**
+ * Boots and coordinates the KaOneBlock gameplay, persistence and optional integrations.
+ */
 public final class KaOneBlock extends JavaPlugin {
     boolean debugMode;
     private StageManager stageManager;
@@ -25,20 +28,25 @@ public final class KaOneBlock extends JavaPlugin {
     private ItemsAdderManager itemsAdderManager;
     private EntityManager entityManager;
 
-    // 位置信息工具方法
+    /**
+     * Creates common debug placeholders for a location.
+     */
     public static Map<String, String> createDebugReplacements(Location location) {
         Map<String, String> replacements = new HashMap<>();
         if (location != null) {
             World world = location.getWorld();
-            String worldName = world != null ? world.getName() : "未知世界";
-            replacements.put("world", worldName);
+            replacements.put("world", world == null ? "unknown" : world.getName());
             replacements.put("x", String.valueOf(location.getBlockX()));
             replacements.put("y", String.valueOf(location.getBlockY()));
             replacements.put("z", String.valueOf(location.getBlockZ()));
+            replacements.put("location", String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ()));
         }
         return replacements;
     }
 
+    /**
+     * Adds a generated block identifier to location debug placeholders.
+     */
     public static Map<String, String> createDebugReplacements(Location location, String blockType) {
         Map<String, String> replacements = createDebugReplacements(location);
         if (blockType != null) {
@@ -47,6 +55,9 @@ public final class KaOneBlock extends JavaPlugin {
         return replacements;
     }
 
+    /**
+     * Adds a chest configuration identifier to location and block debug placeholders.
+     */
     public static Map<String, String> createDebugReplacements(Location location, String blockType, String chestConfig) {
         Map<String, String> replacements = createDebugReplacements(location, blockType);
         if (chestConfig != null) {
@@ -57,180 +68,113 @@ public final class KaOneBlock extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // 插件启动逻辑
-        saveDefaultConfig(); // 保存默认配置（如果不存在）
-        createLangDirectory();
-        createBlockDirectory();
-        createChestsDirectory(); // 创建宝箱目录
-
-        // 加载配置
+        saveDefaultConfig();
+        saveBundledResources();
         reloadConfig();
 
-        // 初始化 ItemsAdder 管理器
-        itemsAdderManager = new ItemsAdderManager(this);
-        enhancedChestManager = new EnhancedChestManager(this);
-        
-        // 初始化实体管理器
-        entityManager = new EntityManager(this);
-
-        // 初始化日志管理器
-        logManager = new LogManager(this);
-
-        // 初始化调试模式
-        debugMode = getConfig().getBoolean("debug", false);
-        getLogger().info("Debug mode: " + (debugMode ? "enabled" : "disabled"));
-
-        // 检查方块目录
-        File blocksDir = new File(getDataFolder(), "blocks");
-        if (!blocksDir.exists() || !blocksDir.isDirectory()) {
-            getLogger().warning("方块目录不存在: " + blocksDir.getAbsolutePath());
-        } else {
-            File[] files = blocksDir.listFiles((dir, name) -> name.endsWith(".yml"));
-            if (files != null) {
-                getLogger().info("加载方块目录中的文件: " + files.length);
-                for (File file : files) {
-                    getLogger().info(" - " + file.getName());
-                }
-            }
-        }
-        // 注册事件监听器
-        BlockBreakListener blockBreakListener = new BlockBreakListener(this);
-        getServer().getPluginManager().registerEvents(blockBreakListener, this);
-
-        // 初始化管理器
         languageManager = new LanguageManager(this);
         languageManager.loadLanguageFiles();
+        debugMode = getConfig().getBoolean("debug", false);
+        logManager = new LogManager(this);
 
-        // 初始化数据库
         databaseManager = new DatabaseManager(this);
-        databaseManager.initialize();
+        if (!databaseManager.initialize()) {
+            getLogger().severe(languageManager.getMessage("database-init-failed"));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        // 初始化阶段系统
         stageConfigManager = new StageConfigManager(this);
-        stageManager = new StageManager(this);
         blockListManager = new BlockListManager(this);
-
-        // 初始化方块生成器
+        stageManager = new StageManager(this);
+        itemsAdderManager = new ItemsAdderManager(this);
+        enhancedChestManager = new EnhancedChestManager(this);
+        entityManager = new EntityManager(this);
         blockGenerator = new BlockGenerator(this);
-        // 注册玩家登录监听器
+
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
-        // 初始化命令管理器
+        PluginCommand command = getCommand("kaoneblock");
+        if (command == null) {
+            throw new IllegalStateException("kaoneblock command is missing from plugin.yml");
+        }
         CommandManager commandManager = new CommandManager(this);
-        Objects.requireNonNull(this.getCommand("kaoneblock")).setExecutor(commandManager);
-        Objects.requireNonNull(this.getCommand("kaoneblock")).setTabCompleter(commandManager);
-
+        command.setExecutor(commandManager);
+        command.setTabCompleter(commandManager);
         getLogger().info(languageManager.getMessage("plugin-enable"));
-    }
-
-    private void createBlockDirectory() {
-        File blockDir = new File(getDataFolder(), "blocks");
-        if (!blockDir.exists() && !blockDir.mkdirs()) {
-            getLogger().warning("Failed to create block directory: " + blockDir.getAbsolutePath());
-        } else {
-            // 保存默认方块列表文件
-            saveResource("blocks/normal.yml", false);
-            saveResource("blocks/nether.yml", false);
-            saveResource("blocks/end.yml", false);
-            getLogger().info("Created block directory and saved default files");
-        }
-    }
-
-    private void createChestsDirectory() {
-        File chestsDir = new File(getDataFolder(), "chests");
-        if (!chestsDir.exists() && !chestsDir.mkdirs()) {
-            getLogger().warning("Failed to create chests directory: " + chestsDir.getAbsolutePath());
-        } else {
-            // 保存默认宝箱配置文件
-            saveResource("chests/example_chest.yml", false);
-            saveResource("chests/advanced_chest.yml", false);
-            saveResource("chests/common_chest.yml", false);
-            saveResource("chests/end_chest.yml", false);
-            saveResource("chests/nether_chest.yml", false);
-            getLogger().info("Created chests directory and saved default files");
-        }
     }
 
     @Override
     public void onDisable() {
-
-        // 新增：从数据库加载玩家进度
-        stageManager.loadAllPlayerProgress();
-
-        // 关闭数据库连接
         if (databaseManager != null) {
             databaseManager.close();
         }
-
-        // 插件关闭逻辑
-        getLogger().info(languageManager.getMessage("plugin-disable"));
-    }
-
-    @Override
-    public void saveDefaultConfig() {
-        super.saveDefaultConfig();
-        // 确保语言目录存在
-        createLangDirectory();
-        // 保存默认语言文件
-        saveResource("lang/lang_en_US.yml", false);
-        saveResource("lang/lang_zh_CN.yml", false);
-    }
-
-    private void createLangDirectory() {
-        File langDir = new File(getDataFolder(), "lang");
-        if (!langDir.exists() && !langDir.mkdirs()) {
-            getLogger().warning("Failed to create language directory: " + langDir.getAbsolutePath());
+        if (logManager != null) {
+            logManager.close();
+        }
+        if (languageManager != null) {
+            getLogger().info(languageManager.getMessage("plugin-disable"));
         }
     }
 
+    /**
+     * Reloads mutable configuration and all file-backed caches without resetting player progress.
+     */
     public void reloadPlugin() {
         reloadConfig();
         debugMode = getConfig().getBoolean("debug", false);
-        getLogger().info("Debug mode: " + (debugMode ? "enabled" : "disabled"));
         languageManager.loadLanguageFiles();
-
-        // 重新加载阶段配置
         stageConfigManager.clearCache();
         blockListManager.clearCache();
-
-        // 重载宝箱配置
-        if (enhancedChestManager != null) {
-            enhancedChestManager.loadChestConfigs();
-        }
-
-        // 更新日志状态
-        boolean logEnabled = getConfig().getBoolean("log", true);
-        logManager.setEnabled(logEnabled);
-        getLogger().info("Logging " + (logEnabled ? "enabled" : "disabled"));
-
+        entityManager.clearCache();
+        enhancedChestManager.loadChestConfigs();
+        logManager.setEnabled(getConfig().getBoolean("log", true));
         getLogger().info(languageManager.getMessage("config-reloaded"));
     }
 
-    // 记录调试信息
+    /**
+     * Writes a raw debug message only when debug mode is enabled.
+     */
     public void debug(String message) {
         if (debugMode) {
             getLogger().info("[DEBUG] " + message);
         }
     }
 
+    /**
+     * Resolves and formats a localized debug message only when debug mode is enabled.
+     */
     public void debug(String key, Map<String, String> replacements) {
-        if (!debugMode) return;
-
-        // 获取原始消息
-        String message = languageManager.getMessage(key);
-
-        // 应用替换
-        for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            String placeholder = "%" + entry.getKey() + "%";
-            message = message.replace(placeholder, entry.getValue());
+        if (!debugMode || languageManager == null) {
+            return;
         }
-
-        // 去除颜色格式
-        String cleanMessage = ChatColor.stripColor(message);
-        debug(cleanMessage);
+        debug(ChatColor.stripColor(languageManager.getMessage(key, replacements)));
     }
 
-    // 添加 getter 方法
+    /**
+     * Saves all editable bundled YAML resources without overwriting server customizations.
+     */
+    private void saveBundledResources() {
+        saveResourceGroup("lang", "lang_en_US.yml", "lang_zh_CN.yml");
+        saveResourceGroup("blocks", "normal.yml", "nether.yml", "end.yml");
+        saveResourceGroup("chests", "example_chest.yml", "advanced_chest.yml", "common_chest.yml", "end_chest.yml", "nether_chest.yml");
+        saveResourceGroup("entities", "normal_entity.yml", "nether_entity.yml", "end_entity.yml");
+    }
+
+    /**
+     * Creates one data subdirectory and copies the named bundled resources into it.
+     */
+    private void saveResourceGroup(String directory, String... resourceNames) {
+        File targetDirectory = new File(getDataFolder(), directory);
+        if (!targetDirectory.exists() && !targetDirectory.mkdirs()) {
+            throw new IllegalStateException("Cannot create resource directory " + targetDirectory);
+        }
+        for (String resourceName : resourceNames) {
+            saveResource(directory + "/" + resourceName, false);
+        }
+    }
+
     public StageManager getStageManager() {
         return stageManager;
     }
@@ -254,7 +198,7 @@ public final class KaOneBlock extends JavaPlugin {
     public ItemsAdderManager getItemsAdderManager() {
         return itemsAdderManager;
     }
-    
+
     public EntityManager getEntityManager() {
         return entityManager;
     }
@@ -283,7 +227,10 @@ public final class KaOneBlock extends JavaPlugin {
         return itemsAdderManager != null && itemsAdderManager.isLoaded();
     }
 
+    /**
+     * Formats an enum material identifier for concise player-facing output.
+     */
     public String formatMaterialName(Material material) {
-        return material.name().toLowerCase().replace("_", " ");
+        return material.name().toLowerCase().replace('_', ' ');
     }
 }

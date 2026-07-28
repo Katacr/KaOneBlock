@@ -13,8 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -57,10 +55,11 @@ public class EnhancedChestManager {
                         if (config.isConfigurationSection("amount")) {
                             ConfigurationSection amountSection = config.getConfigurationSection("amount");
                             if (amountSection != null) {
-                                chestConfig.globalMinItems = amountSection.getInt("min", 3);
-                            }
-                            if (amountSection != null) {
-                                chestConfig.globalMaxItems = amountSection.getInt("max", 6);
+                                chestConfig.globalMinItems = normalizeItemCount(amountSection.getInt("min", 3));
+                                chestConfig.globalMaxItems = Math.max(
+                                        chestConfig.globalMinItems,
+                                        normalizeItemCount(amountSection.getInt("max", 6))
+                                );
                             }
                         } else {
                             // 默认值
@@ -75,8 +74,11 @@ public class EnhancedChestManager {
                                 ConfigurationSection groupSection = groupsSection.getConfigurationSection(groupKey);
                                 if (groupSection != null) {
                                     ChestGroup group = new ChestGroup();
-                                    group.minItems = groupSection.getInt("min", chestConfig.globalMinItems);
-                                    group.maxItems = groupSection.getInt("max", chestConfig.globalMaxItems);
+                                    group.minItems = normalizeItemCount(groupSection.getInt("min", chestConfig.globalMinItems));
+                                    group.maxItems = Math.max(
+                                            group.minItems,
+                                            normalizeItemCount(groupSection.getInt("max", chestConfig.globalMaxItems))
+                                    );
 
                                     // 加载组内物品
                                     ConfigurationSection itemsSection = groupSection.getConfigurationSection("items");
@@ -126,10 +128,16 @@ public class EnhancedChestManager {
             }
         }
 
-        if (chestConfigs.isEmpty()) {
-            plugin.getLogger().warning("No enhanced chest configs found! Using fallback config.");
+        if (!chestConfigs.containsKey("fallback")) {
             createFallbackConfig();
         }
+    }
+
+    /**
+     * Restricts one configured loot count to the number of slots in a single chest.
+     */
+    private int normalizeItemCount(int amount) {
+        return Math.max(0, Math.min(27, amount));
     }
 
     private ContainerItem parseContainerItem(ConfigurationSection itemSection) {
@@ -141,19 +149,17 @@ public class EnhancedChestManager {
             return null;
         }
 
+        int slot = itemSection.getInt("slot", -1);
+        int min = itemSection.getInt("min", 1);
+        int max = itemSection.getInt("max", min);
         ItemStack itemStack;
         Material material = null;
 
-        if (materialName.startsWith("IA:")) {
+        if (materialName.regionMatches(true, 0, "IA:", 0, 3)) {
             String customItemId = materialName.substring(3);
-
-            // 简化逻辑：只尝试静默获取一次
             itemStack = plugin.getItemsAdderManager().getCustomItemSilently(customItemId);
-
-            // 如果获取失败，创建占位物品
             if (itemStack == null) {
-                itemStack = createPlaceholderItem(customItemId);
-                plugin.debug("Created placeholder for IA item: " + customItemId);
+                return ContainerItem.custom(plugin, customItemId, slot, min, max);
             }
         } else {
             // 原版物品
@@ -294,10 +300,6 @@ public class EnhancedChestManager {
                 itemStack.setItemMeta(potionMeta);
             }
         }
-        int slot = itemSection.getInt("slot", -1);
-        int min = itemSection.getInt("min", 1);
-        int max = itemSection.getInt("max", min);
-
         return new ContainerItem(plugin, itemStack, slot, min, max);
     }
 
@@ -320,38 +322,6 @@ public class EnhancedChestManager {
                        e.getKey().toString().equalsIgnoreCase("minecraft:" + name))
             .findFirst()
             .orElse(null);
-    }
-
-    // 创建占位物品（标记为需要运行时处理）
-    private ItemStack createPlaceholderItem(String itemId) {
-        ItemStack placeholder = new ItemStack(Material.BARRIER);
-        ItemMeta meta = placeholder.getItemMeta();
-
-        // 设置显示名称提醒
-        if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "待加载物品: " + itemId);
-        }
-
-        // 添加Lore说明
-        List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "ItemsAdder 物品尚未加载");
-        lore.add(ChatColor.GRAY + "将在运行时尝试重新获取");
-        if (meta != null) {
-            meta.setLore(lore);
-        }
-
-        // 存储原始物品ID（用于后续获取）
-        PersistentDataContainer pdc = null;
-        if (meta != null) {
-            pdc = meta.getPersistentDataContainer();
-        }
-        NamespacedKey key = new NamespacedKey(plugin, "ia-item-id");
-        if (pdc != null) {
-            pdc.set(key, PersistentDataType.STRING, itemId);
-        }
-
-        placeholder.setItemMeta(meta);
-        return placeholder;
     }
 
     private void createFallbackConfig() {
@@ -423,7 +393,7 @@ public class EnhancedChestManager {
                 ContainerItem item = group.weightedItems.getRandom();
                 if (item != null) {
                     selectedItems.add(item);
-                    plugin.debug("Selected item: " + item.buildItem().getType());
+                    plugin.debug("Selected item: " + item.describeType());
                 }
             }
 
@@ -467,17 +437,8 @@ public class EnhancedChestManager {
             // 获取宝箱的方块状态
             BlockState state = chest.getBlock().getState();
             if (state instanceof org.bukkit.block.Chest chestState) {
-                // 复制库存
-                chestState.getInventory().setContents(chest.getInventory().getContents());
-
-                // 复制名称
                 chestState.setCustomName(chest.getCustomName());
-
-                // 关键修复：完全避免设置锁定状态
-                // 不设置锁定状态，避免触发问题
-
-                // 更新方块状态
-                chestState.update(true, true);
+                chestState.update(true, false);
                 plugin.debug("Chest updated safely without lock");
             } else {
                 plugin.debug("Block is no longer a chest, cannot update");
@@ -494,11 +455,6 @@ public class EnhancedChestManager {
 
         List<String> configNames = new ArrayList<>(chestConfigs.keySet());
         return configNames.get(random.nextInt(configNames.size()));
-    }
-
-    public boolean shouldGenerateChest() {
-        double chance = plugin.getConfig().getDouble("chest.chance", 0.05);
-        return random.nextDouble() <= chance;
     }
 
     public void debugChestContents(org.bukkit.block.Chest chest) {
@@ -532,7 +488,7 @@ public class EnhancedChestManager {
         public String name = "宝箱";
         public int globalMinItems = 3;
         public int globalMaxItems = 6;
-        public Map<String, ChestGroup> groups = new HashMap<>();
+        public Map<String, ChestGroup> groups = new LinkedHashMap<>();
     }
 
     private static class ChestGroup {

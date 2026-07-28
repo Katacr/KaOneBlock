@@ -1,6 +1,7 @@
 # nether.yml
 amount: 500  # 需要破坏500个方块进入下一阶段
 message: '&c您已进入下界阶段'   # 开始阶段时的提示
+next: end   # 下一阶段的配置(end.yml)
 entity_pack: nether_entity # 实体包
 entity_chance: 0.05  # 实体生成概率(5%)
 chests:  #各个宝箱概率

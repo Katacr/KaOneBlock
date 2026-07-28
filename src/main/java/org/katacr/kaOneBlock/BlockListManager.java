@@ -21,9 +21,11 @@ public class BlockListManager {
      * 获取指定阶段的方块列表
      */
     public WeightedRandom<Object> getBlockList(String stageFile) {
-        // 确保文件名有扩展名
-        if (!stageFile.endsWith(".yml")) {
-            stageFile += ".yml";
+        try {
+            stageFile = StageConfigManager.normalizeStageFile(stageFile);
+        } catch (IllegalArgumentException exception) {
+            plugin.getLogger().warning("非法方块列表名称: " + stageFile);
+            return null;
         }
 
         // 检查缓存
@@ -81,17 +83,17 @@ public class BlockListManager {
 
             if (normalizedName.startsWith("ia:")) {
                 // ItemsAdder 方块 - 使用原始名称（包含命名空间）
-                int weight = blocksSection.getInt(materialName, 1);
+                double weight = blocksSection.getDouble(materialName, 1);
                 weightedRandom.add(materialName, weight);
-                plugin.getLogger().info("Added ItemsAdder block to list: " + materialName + " (weight: " + weight + ")");
+                plugin.debug("Added ItemsAdder block to list: " + materialName + " (weight: " + weight + ")");
             } else {
                 try {
                     // 尝试匹配原版方块（不区分大小写）
                     Material material = Material.matchMaterial(materialName);
                     if (material != null) {
-                        int weight = blocksSection.getInt(materialName, 1);
+                        double weight = blocksSection.getDouble(materialName, 1);
                         weightedRandom.add(material, weight);
-                        plugin.getLogger().info("Added material to list: " + material.name() + " (weight: " + weight + ")");
+                        plugin.debug("Added material to list: " + material.name() + " (weight: " + weight + ")");
                     } else {
                         plugin.getLogger().warning("Invalid material name: " + materialName + " in " + fileName);
                     }

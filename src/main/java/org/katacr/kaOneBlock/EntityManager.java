@@ -1,152 +1,202 @@
-﻿package org.katacr.kaOneBlock;
+package org.katacr.kaOneBlock;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
+/**
+ * Loads weighted entity packs, applies configured equipment and spawns safe living entities.
+ */
 public class EntityManager {
     private final KaOneBlock plugin;
-    private final Map<String, Map<String, EntityConfig>> entityPackCache = new HashMap<>();
-    private final Random random = new Random();
+    private final Map<String, Map<String, EntityConfig>> entityPackCache = new LinkedHashMap<>();
 
     public EntityManager(KaOneBlock plugin) {
         this.plugin = plugin;
     }
 
-    public static class EntityConfig {
-        public String name;
-        public String nameTag;
-        public EntityType type;
-        public int weight;
-
-        public EntityConfig(String name, String nameTag, EntityType type, int weight) {
-            this.name = name;
-            this.nameTag = nameTag;
-            this.type = type;
-            this.weight = weight;
-        }
-    }
-
+    /**
+     * Loads and caches one entity pack from the canonical or legacy data directory.
+     */
     public Map<String, EntityConfig> loadEntityPack(String packName) {
+        if (packName == null || !packName.matches("[A-Za-z0-9_-]+")) {
+            plugin.getLogger().warning("非法实体包名称: " + packName);
+            return Map.of();
+        }
         if (entityPackCache.containsKey(packName)) {
             return entityPackCache.get(packName);
         }
 
-        File entityFile = new File(plugin.getDataFolder(), "entitys/" + packName + ".yml");
-        plugin.debug("加载实体包: " + entityFile.getAbsolutePath());
-
+        File entityFile = new File(plugin.getDataFolder(), "entities/" + packName + ".yml");
+        if (!entityFile.exists()) {
+            File legacyFile = new File(plugin.getDataFolder(), "entitys/" + packName + ".yml");
+            if (legacyFile.exists()) {
+                entityFile = legacyFile;
+                plugin.getLogger().warning("正在使用旧 entitys 目录，请迁移到 entities: " + legacyFile.getName());
+            }
+        }
         if (!entityFile.exists()) {
             plugin.getLogger().warning("实体包文件不存在: " + entityFile.getAbsolutePath());
-            return new HashMap<>();
+            return Map.of();
         }
 
         FileConfiguration yaml = YamlConfiguration.loadConfiguration(entityFile);
-        Map<String, EntityConfig> entityConfigs = new HashMap<>();
-
-        ConfigurationSection listSection = yaml.getConfigurationSection("list");
-        if (listSection != null) {
-            for (String entityKey : listSection.getKeys(false)) {
-                ConfigurationSection entitySection = listSection.getConfigurationSection(entityKey);
-                if (entitySection != null) {
-                    try {
-                        String name = entityKey;
-                        String nameTag = entitySection.getString("name", "");
-                        String typeName = entitySection.getString("type", "ZOMBIE");
-                        EntityType type;
-                        try {
-                            type = EntityType.valueOf(typeName.toUpperCase());
-                        } catch (IllegalArgumentException e) {
-                            plugin.getLogger().warning("未知的实体类型: " + typeName + ", 默认使用ZOMBIE");
-                            type = EntityType.ZOMBIE;
-                        }
-                        int weight = entitySection.getInt("weight", 10);
-
-                        EntityConfig config = new EntityConfig(name, nameTag, type, weight);
-                        entityConfigs.put(name, config);
-                    } catch (Exception e) {
-                        plugin.getLogger().log(Level.WARNING, "加载实体配置失败: " + entityKey, e);
-                    }
+        Map<String, EntityConfig> configurations = new LinkedHashMap<>();
+        ConfigurationSection list = yaml.getConfigurationSection("list");
+        if (list != null) {
+            for (String entityKey : list.getKeys(false)) {
+                ConfigurationSection section = list.getConfigurationSection(entityKey);
+                EntityConfig config = section == null ? null : parseEntity(entityKey, section);
+                if (config != null) {
+                    configurations.put(entityKey, config);
                 }
             }
         }
 
-        entityPackCache.put(packName, entityConfigs);
-        plugin.debug("加载实体包: " + packName + ", 包含 " + entityConfigs.size() + " 个实体");
-        return entityConfigs;
+        Map<String, EntityConfig> immutable = Map.copyOf(configurations);
+        entityPackCache.put(packName, immutable);
+        return immutable;
     }
 
+    /**
+     * Selects one entity from a pack according to positive configured weights.
+     */
     public EntityConfig getRandomEntity(String packName) {
-        Map<String, EntityConfig> entityConfigs = loadEntityPack(packName);
-        if (entityConfigs.isEmpty()) {
-            return null;
-        }
-
-        int totalWeight = 0;
-        for (EntityConfig config : entityConfigs.values()) {
-            totalWeight += config.weight;
-        }
-
+        Map<String, EntityConfig> configurations = loadEntityPack(packName);
+        long totalWeight = configurations.values().stream().mapToLong(EntityConfig::weight).sum();
         if (totalWeight <= 0) {
             return null;
         }
 
-        int randomWeight = random.nextInt(totalWeight);
-        int currentWeight = 0;
-
-        for (EntityConfig config : entityConfigs.values()) {
-            currentWeight += config.weight;
-            if (randomWeight < currentWeight) {
+        long roll = ThreadLocalRandom.current().nextLong(totalWeight);
+        long cumulative = 0;
+        for (EntityConfig config : configurations.values()) {
+            cumulative += config.weight();
+            if (roll < cumulative) {
                 return config;
             }
         }
-
-        return entityConfigs.values().iterator().next();
+        return null;
     }
 
+    /**
+     * Spawns one configured living entity and applies its name and equipment.
+     */
     public LivingEntity spawnEntity(Location location, String packName) {
         EntityConfig config = getRandomEntity(packName);
-        if (config == null) {
-            plugin.getLogger().warning("无法获取实体配置: " + packName);
+        World world = location.getWorld();
+        if (config == null || world == null) {
             return null;
         }
 
         try {
-            World world = location.getWorld();
-            if (world == null) {
+            if (!(world.spawnEntity(location, config.type()) instanceof LivingEntity entity)) {
                 return null;
             }
-
-            LivingEntity entity = (LivingEntity) world.spawnEntity(location, config.type);
-            if (entity == null) {
-                return null;
-            }
-
-            if (config.nameTag != null && !config.nameTag.isEmpty()) {
-                entity.setCustomName(config.nameTag);
+            if (!config.nameTag().isBlank()) {
+                entity.setCustomName(ChatColor.translateAlternateColorCodes('&', config.nameTag()));
                 entity.setCustomNameVisible(true);
             }
-
-            plugin.debug("生成实体: " + config.name + " 在位置 " + 
-                       location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
+            applyEquipment(entity.getEquipment(), config.equipment());
             return entity;
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "生成实体失败: " + packName, e);
+        } catch (RuntimeException exception) {
+            plugin.getLogger().log(Level.SEVERE, "生成实体失败: " + packName, exception);
             return null;
         }
     }
 
+    /**
+     * Clears cached entity packs so edited files are read on the next generation.
+     */
     public void clearCache() {
         entityPackCache.clear();
-        plugin.debug("Cleared entity pack cache");
+    }
+
+    /**
+     * Parses and validates one entity entry from YAML.
+     */
+    private EntityConfig parseEntity(String key, ConfigurationSection section) {
+        String typeName = section.getString("type", "ZOMBIE");
+        try {
+            EntityType type = EntityType.valueOf(typeName == null ? "ZOMBIE" : typeName.toUpperCase());
+            if (!type.isAlive()) {
+                plugin.getLogger().warning("实体类型不是生物: " + typeName);
+                return null;
+            }
+            String nameTag = section.getString("name", "");
+            int weight = Math.max(0, section.getInt("weight", 10));
+            return new EntityConfig(key, nameTag == null ? "" : nameTag, type, weight, parseEquipment(section));
+        } catch (IllegalArgumentException exception) {
+            plugin.getLogger().warning("未知实体类型: " + typeName);
+            return null;
+        }
+    }
+
+    /**
+     * Parses supported armor and hand slots while ignoring invalid materials safely.
+     */
+    private Map<EquipmentSlot, Material> parseEquipment(ConfigurationSection entitySection) {
+        ConfigurationSection armor = entitySection.getConfigurationSection("armors");
+        if (armor == null) {
+            return Map.of();
+        }
+
+        Map<EquipmentSlot, Material> equipment = new EnumMap<>(EquipmentSlot.class);
+        Map<String, EquipmentSlot> slots = Map.of(
+                "helmet", EquipmentSlot.HEAD,
+                "chestplate", EquipmentSlot.CHEST,
+                "leggings", EquipmentSlot.LEGS,
+                "boots", EquipmentSlot.FEET,
+                "mainhand", EquipmentSlot.HAND,
+                "offhand", EquipmentSlot.OFF_HAND
+        );
+        slots.forEach((path, slot) -> {
+            String materialName = armor.getString(path);
+            Material material = materialName == null ? null : Material.matchMaterial(materialName);
+            if (material != null && material != Material.AIR) {
+                equipment.put(slot, material);
+            } else if (materialName != null) {
+                plugin.getLogger().warning("无效实体装备: " + materialName);
+            }
+        });
+        return Map.copyOf(equipment);
+    }
+
+    /**
+     * Applies parsed equipment to a living entity when its type supports equipment.
+     */
+    private void applyEquipment(EntityEquipment target, Map<EquipmentSlot, Material> equipment) {
+        if (target == null) {
+            return;
+        }
+        equipment.forEach((slot, material) -> target.setItem(slot, new ItemStack(material)));
+    }
+
+    /**
+     * Immutable validated entity configuration used by weighted selection.
+     */
+    public record EntityConfig(
+            String name,
+            String nameTag,
+            EntityType type,
+            int weight,
+            Map<EquipmentSlot, Material> equipment
+    ) {
     }
 }

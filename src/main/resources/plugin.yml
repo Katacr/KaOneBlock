@@ -1,7 +1,7 @@
 name: KaOneBlock
-version: 1.0
+version: ${version}
 main: org.katacr.kaOneBlock.KaOneBlock
-api-version: 1.13
+api-version: '1.18'
 softdepend: [ItemsAdder]
 commands:
   kaoneblock:
@@ -11,10 +11,26 @@ commands:
 permissions:
   kaoneblock.help:
     description: Allows access to help command
-    default: op
+    default: true
   kaoneblock.start:
     description: Allows starting block generation
-    default: op
+    default: true
   kaoneblock.stop:
     description: Allows stopping block generation
+    default: true
+  kaoneblock.reload:
+    description: Allows reloading KaOneBlock configuration
     default: op
+  kaoneblock.log:
+    description: Allows changing activity logging
+    default: op
+  kaoneblock.debug:
+    description: Allows debug commands and messages
+    default: op
+  kaoneblock.admin:
+    description: Allows all KaOneBlock administrative operations
+    default: op
+    children:
+      kaoneblock.reload: true
+      kaoneblock.log: true
+      kaoneblock.debug: true

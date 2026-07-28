@@ -35,7 +35,7 @@ public class ContainerPoll {
         // 收集所有空槽位
         List<Integer> emptySlots = new ArrayList<>();
         for (int i = 0; i < inventory.getSize(); i++) {
-            if (inventory.getItem(i) == null) {
+            if (inventory.getItem(i) == null || inventory.getItem(i).getType() == Material.AIR) {
                 emptySlots.add(i);
             }
         }
@@ -70,9 +70,11 @@ public class ContainerPoll {
                 if (slot < 0 || slot >= inventory.getSize()) {
                     plugin.debug("Specified slot is out of range: " + slot);
                     slot = emptySlots.isEmpty() ? -1 : emptySlots.remove(0);
-                } else if (inventory.getItem(slot) != null) {
+                } else if (inventory.getItem(slot) != null && inventory.getItem(slot).getType() != Material.AIR) {
                     plugin.debug("Specified slot is occupied: " + slot);
                     slot = emptySlots.isEmpty() ? -1 : emptySlots.remove(0);
+                } else {
+                    emptySlots.remove(Integer.valueOf(slot));
                 }
             } else {
                 slot = emptySlots.isEmpty() ? -1 : emptySlots.remove(0);

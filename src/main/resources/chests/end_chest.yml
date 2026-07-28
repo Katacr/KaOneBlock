@@ -338,7 +338,7 @@ items:
     weight: 6
 
   44:
-    material: MUSIC_DISC_5
+    material: MUSIC_DISC_OTHERSIDE
     slot: -1
     min: 1
     max: 1
@@ -431,7 +431,7 @@ items:
     weight: 8
 
   55:
-    material: ECHO_SHARD
+    material: AMETHYST_SHARD
     slot: -1
     min: 2
     max: 4
@@ -511,7 +511,7 @@ items:
 
   # 末地特殊物品 (权重 5-8)
   66:
-    material: RECOVERY_COMPASS
+    material: COMPASS
     slot: -1
     min: 1
     max: 1
@@ -525,14 +525,14 @@ items:
     weight: 8
 
   68:
-    material: GOAT_HORN
+    material: BELL
     slot: -1
     min: 1
     max: 1
     weight: 6
 
   69:
-    material: DISC_FRAGMENT_5
+    material: PRISMARINE_SHARD
     slot: -1
     min: 1
     max: 1
@@ -683,7 +683,7 @@ items:
 
 
   90:
-    material: REINFORCED_DEEPSLATE
+    material: DEEPSLATE_BRICKS
     slot: -1
     min: 1
     max: 2
@@ -1172,21 +1172,21 @@ items:
     weight: 9
 
   162:
-    material: OCHRE_FROGLIGHT
+    material: SEA_LANTERN
     slot: -1
     min: 2
     max: 4
     weight: 8
 
   163:
-    material: VERDANT_FROGLIGHT
+    material: GLOWSTONE
     slot: -1
     min: 2
     max: 4
     weight: 8
 
   164:
-    material: PEARLESCENT_FROGLIGHT
+    material: SHROOMLIGHT
     slot: -1
     min: 2
     max: 4
